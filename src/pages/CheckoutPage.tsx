@@ -64,47 +64,50 @@ export default function CheckoutPage() {
     }
   }
 
-const handlePlaceOrder = async () => {
-  if (!selectedAddress) return setError('Please select a delivery address')
-  if (items.length === 0) return setError('Your cart is empty')
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) return setError('Please select a delivery address')
+    if (items.length === 0) return setError('Your cart is empty')
 
-  setPlacing(true)
-  setError('')
+    setPlacing(true)
+    setError('')
 
-  try {
-    // Initialize payment with backend
-    const data = await initializePayment(selectedAddress)
 
-    // Open Paystack popup
-    const handler = (window as any).PaystackPop.setup({
-      key: data.publicKey,
-      email: data.email,
-      amount: Math.round(data.amount * 100),
-      currency: 'ZAR',
-      ref: data.reference,
-      onClose: () => {
+    try {
+      const data = await initializePayment(selectedAddress)
+
+      if (!(window as any).PaystackPop) {
+        setError('Payment system not loaded. Please refresh the page.')
         setPlacing(false)
-        setError('Payment cancelled')
-      },
-      callback: async (response: any) => {
-        try {
-          // Verify and get order ID
-          const result = await verifyPayment(response.reference)
-          await fetchCart() // clear cart state
-          navigate(`/orders/${result.orderId}`)
-        } catch {
-          setError('Payment successful but order creation failed. Contact support.')
-          setPlacing(false)
-        }
-      },
-    })
+        return
+      }
 
-    handler.openIframe()
-  } catch (err: any) {
-    setError(err.response?.data?.message || 'Failed to initialize payment')
-    setPlacing(false)
+      (window as any).PaystackPop.newTransaction({
+        key: data.publicKey,
+        email: data.email,
+        amount: Math.round(data.amount * 100),
+        currency: 'ZAR',
+        ref: data.reference,
+        onClose: () => {
+          setPlacing(false)
+          setError('Payment cancelled')
+        },
+        onSuccess: async (response: any) => {
+          try {
+            const result = await verifyPayment(response.reference)
+            await fetchCart()
+            navigate(`/orders/${result.orderId}`)
+          } catch {
+            setError('Payment successful but order creation failed. Contact support.')
+            setPlacing(false)
+          }
+        },
+      })
+    
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to initialize payment')
+      setPlacing(false)
+    }
   }
-}
 
   const shipping = Number(total) >= 1000 ? 0 : 100
   const orderTotal = Number(total) + shipping
