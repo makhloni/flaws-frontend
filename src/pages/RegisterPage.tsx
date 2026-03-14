@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { register } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
 import { login } from '../api/auth.api'
 
 export default function RegisterPage() {
-  const navigate = useNavigate()
   const { setAuth } = useAuthStore()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -22,7 +21,7 @@ export default function RegisterPage() {
       await register(name, email, password, phone)
       const data = await login(email, password)
       setAuth(data.token, data.user)
-      navigate('/')
+      window.location.href = '/' 
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed')
     } finally {

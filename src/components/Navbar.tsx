@@ -15,11 +15,26 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handler)
   }, [])
 
-  // close menu on resize to desktop
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handler)
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
+
   useEffect(() => {
     if (!isMobile) setMenuOpen(false)
   }, [isMobile])
-
   const navLinks = [
     { label: 'Shop', to: '/products' },
     { label: 'Collections', to: '/collections' },
@@ -31,7 +46,7 @@ export default function Navbar() {
         position: 'sticky',
         top: 0, left: 0, right: 0,
         zIndex: 1000,
-        height: '64px',
+        height: '100vw',
         background: scrolled || menuOpen ? 'rgba(10,10,10,0.98)' : 'transparent',
         borderBottom: scrolled || menuOpen ? '1px solid #1a1a1a' : '1px solid transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
