@@ -76,18 +76,17 @@ export default function CheckoutPage() {
       const data = await initializePayment(selectedAddress)
 
       // Open Paystack popup
-      const handler = (window as any).PaystackPop.newTransaction({
+      const handler = (window as any).PaystackPop.setup({
         key: data.publicKey,
         email: data.email,
         amount: Math.round(data.amount * 100),
         currency: 'ZAR',
         ref: data.reference,
-        access_code: data.accessCode,
         onClose: () => {
           setPlacing(false)
           setError('Payment cancelled')
         },
-        onSuccess: async (response: any) => {
+        callback: async (response: any) => {
           try {
             const result = await verifyPayment(response.reference)
             await fetchCart()
@@ -98,6 +97,8 @@ export default function CheckoutPage() {
           }
         },
       })
+
+      handler.openIframe()
 
       handler.openIframe()
     } catch (err: any) {
