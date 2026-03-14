@@ -72,7 +72,6 @@ export default function CheckoutPage() {
     setError('')
 
     try {
-      // Initialize payment with backend
       const data = await initializePayment(selectedAddress)
 
       // Open Paystack popup

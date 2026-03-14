@@ -7,20 +7,63 @@ interface Product {
   id: string
   name: string
   slug: string
+  isFeatured: boolean
   images: { url: string; isPrimary: boolean }[]
   variants: { price: number; salePrice: number | null }[]
+}
+
+interface SiteContent {
+  banner_text?: string
+  hero_headline?: string
+  hero_subtext?: string
+  featured_product_ids?: string
+  featured_collection_ids?: string
 }
 
 export default function HomePage() {
   const { isMobile } = useBreakpoint()
   const [featured, setFeatured] = useState<Product[]>([])
+  const [content, setContent] = useState<SiteContent>({})
 
   useEffect(() => {
-    axios.get('/products').then((res) => {
-      const featuredProducts = res.data.filter((p: any) => p.isFeatured)
-      setFeatured(featuredProducts)
+    // Fetch products and site content in parallel
+    Promise.all([
+      axios.get('/products'),
+      axios.get('/content'),
+    ]).then(([productsRes, contentRes]) => {
+      const siteContent: SiteContent = contentRes.data
+      setContent(siteContent)
+
+      const allProducts: Product[] = productsRes.data
+
+      // If admin has selected specific featured products, use that order
+      if (siteContent.featured_product_ids) {
+        const ids = siteContent.featured_product_ids
+          .split(',')
+          .filter(Boolean)
+
+        if (ids.length > 0) {
+          // Preserve the order admin selected them in
+          const ordered = ids
+            .map(id => allProducts.find(p => p.id === id))
+            .filter(Boolean) as Product[]
+          setFeatured(ordered)
+          return
+        }
+      }
+
+      // Fallback: use isFeatured flag from product
+      setFeatured(allProducts.filter(p => p.isFeatured))
     })
   }, [])
+
+  // Parse featured collection IDs for the collections banner
+  const featuredCollectionIds = content.featured_collection_ids
+    ? content.featured_collection_ids.split(',').filter(Boolean)
+    : []
+
+  const heroHeadline = content.hero_headline || 'FLAWS'
+  const heroSubtext = content.hero_subtext || 'New Season — 2026'
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
@@ -35,8 +78,14 @@ export default function HomePage() {
         padding: isMobile ? '0 1.5rem' : '0 4rem',
         textAlign: 'center',
       }}>
-        <p style={{ fontSize: isMobile ? '0.6rem' : '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#888', marginBottom: '1.5rem' }}>
-          New Season — 2026
+        <p style={{
+          fontSize: isMobile ? '0.6rem' : '0.7rem',
+          letterSpacing: '0.3em',
+          textTransform: 'uppercase',
+          color: '#888',
+          marginBottom: '1.5rem',
+        }}>
+          {heroSubtext}
         </p>
         <h1 style={{
           fontSize: isMobile ? 'clamp(3rem, 15vw, 5rem)' : 'clamp(4rem, 10vw, 9rem)',
@@ -46,7 +95,7 @@ export default function HomePage() {
           lineHeight: 0.9,
           marginBottom: '2rem',
         }}>
-          FLAWS
+          {heroHeadline}
         </h1>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <Link to="/products" style={{
@@ -132,7 +181,6 @@ export default function HomePage() {
         </section>
       )}
 
-
       {/* Collections Banner */}
       <section style={{
         padding: isMobile ? '3rem 1rem' : '6rem 2rem',
@@ -149,7 +197,11 @@ export default function HomePage() {
           <CollectionBanner
             title="Men's"
             subtitle="Essentials"
-            href="/collections?gender=MEN"
+            href={
+              featuredCollectionIds.length > 0
+                ? `/collections?gender=MEN`
+                : '/collections?gender=MEN'
+            }
             isMobile={isMobile}
           />
           <CollectionBanner
@@ -217,7 +269,6 @@ function ProductCard({ product }: { product: Product }) {
           overflow: 'hidden',
         }}
       >
-        {/* Image */}
         <div style={{
           aspectRatio: '3/4',
           overflow: 'hidden',
@@ -253,7 +304,6 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Info */}
         <div style={{ padding: '1rem' }}>
           <p style={{
             fontSize: '0.75rem',
@@ -265,10 +315,7 @@ function ProductCard({ product }: { product: Product }) {
             {product.name}
           </p>
           {price && (
-            <p style={{
-              fontSize: '0.75rem',
-              color: '#888',
-            }}>
+            <p style={{ fontSize: '0.75rem', color: '#888' }}>
               R{Number(price).toFixed(2)}
             </p>
           )}

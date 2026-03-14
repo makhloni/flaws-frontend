@@ -107,7 +107,7 @@ export default function Navbar() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1.5rem' }}>
           {!isMobile && (
             <Link to={user ? '/account' : '/login'} style={linkStyle}>
-              {user ? user.name.split(' ')[0] : 'Login'}
+              {user ? (user.name?.split(' ')[0] || 'Account') : 'Login'}
             </Link>
           )}
           <Link to="/cart" style={linkStyle}>Cart</Link>

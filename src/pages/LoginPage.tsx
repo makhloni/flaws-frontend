@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { login } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
 
 export default function LoginPage() {
-  const navigate = useNavigate()
   const { setAuth } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,7 +17,7 @@ export default function LoginPage() {
     try {
       const data = await login(email, password)
       setAuth(data.token, data.user)
-      navigate('/')
+      window.location.href = '/'
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials')
     } finally {
