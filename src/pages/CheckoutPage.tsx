@@ -71,22 +71,18 @@ export default function CheckoutPage() {
     setPlacing(true)
     setError('')
 
-
     try {
+      // Initialize payment with backend
       const data = await initializePayment(selectedAddress)
 
-      if (!(window as any).PaystackPop) {
-        setError('Payment system not loaded. Please refresh the page.')
-        setPlacing(false)
-        return
-      }
-
-      (window as any).PaystackPop.newTransaction({
+      // Open Paystack popup
+      const handler = (window as any).PaystackPop.newTransaction({
         key: data.publicKey,
         email: data.email,
         amount: Math.round(data.amount * 100),
         currency: 'ZAR',
         ref: data.reference,
+        access_code: data.accessCode,
         onClose: () => {
           setPlacing(false)
           setError('Payment cancelled')
@@ -102,7 +98,8 @@ export default function CheckoutPage() {
           }
         },
       })
-    
+
+      handler.openIframe()
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to initialize payment')
       setPlacing(false)
