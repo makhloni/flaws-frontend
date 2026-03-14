@@ -101,6 +101,7 @@ export default function CheckoutPage() {
 
       handler.openIframe()
     } catch (err: any) {
+      console.error('Payment error:', err)
       setError(err.response?.data?.message || 'Failed to initialize payment')
       setPlacing(false)
     }
