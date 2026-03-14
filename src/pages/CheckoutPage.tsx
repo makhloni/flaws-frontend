@@ -76,13 +76,8 @@ export default function CheckoutPage() {
       const data = await initializePayment(selectedAddress)
 
       // Open Paystack popup
-      const handler = new (window as any).PaystackPop({
-        key: data.publicKey,
-        email: data.email,
-        amount: Math.round(data.amount * 100),
-        currency: 'ZAR',
-        ref: data.reference,
-        onClose: () => { setPlacing(false); setError('Payment cancelled') },
+      const handler = new (window as any).PaystackPop()
+      handler.resumeTransaction(data.accessCode, {
         onSuccess: async (response: any) => {
           try {
             const result = await verifyPayment(response.reference)
@@ -92,6 +87,10 @@ export default function CheckoutPage() {
             setError('Payment successful but order creation failed. Contact support.')
             setPlacing(false)
           }
+        },
+        onCancel: () => {
+          setPlacing(false)
+          setError('Payment cancelled')
         },
       })
       handler.open()
