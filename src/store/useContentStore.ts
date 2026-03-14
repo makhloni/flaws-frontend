@@ -10,7 +10,7 @@ interface ContentStore {
 
 export const useContentStore = create<ContentStore>((set) => ({
     content: {
-        banner_text: 'Free shipping on orders over R1000 — South Africa wide',
+        banner_text: 'Free shipping on orders over R1000 — South Africa',
         hero_headline: 'Flaws',
         hero_subtext: 'New Season — 2026',
         featured_product_ids: '',
