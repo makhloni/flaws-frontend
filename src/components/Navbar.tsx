@@ -44,7 +44,7 @@ export default function Navbar() {
   return (
     <>
       <nav style={{
-        position: 'fixed',
+        position: 'sticky',
         top: 0, left: 0, right: 0,
         zIndex: 1000,
         height: '64px',
@@ -132,7 +132,7 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       {isMobile && menuOpen && (
         <div style={{
-          position: 'fixed',
+          position: 'sticky',
           top: '64px', left: 0, right: 0, bottom: 0,
           background: '#0a0a0a',
           zIndex: 999,
