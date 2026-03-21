@@ -47,8 +47,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
   localStorage.setItem('token', token)
   set({ token, user })
 
-  // Get guest cart items before clearing
+  
   const guestItems = JSON.parse(localStorage.getItem('flaws_guest_cart') || '[]')
+
+  localStorage.removeItem('flaws_guest_cart')
 
   if (guestItems.length > 0) {
     try {
@@ -60,7 +62,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         }))
       )
     } catch {
-      // Merge failed silently — user cart still works
+      
     }
     localStorage.removeItem('flaws_guest_cart')
   }
