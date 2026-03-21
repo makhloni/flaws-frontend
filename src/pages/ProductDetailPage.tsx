@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { getProductBySlug } from '../api/products.api'
+import { useParams, Link } from 'react-router-dom'
+import { getProductBySlug, getRelatedProducts } from '../api/products.api'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import api from '../api/axios'
 import { useGuestCartStore } from '../store/useGuestCartStore'
@@ -16,6 +16,7 @@ interface Variant {
   stock: number
 }
 
+
 interface Product {
   id: string
   name: string
@@ -26,6 +27,15 @@ interface Product {
   collection: { name: string; slug: string }
   images: { id: string; url: string; isPrimary: boolean; position: number }[]
   variants: Variant[]
+}
+
+interface RelatedProduct {
+  id: string
+  name: string
+  slug: string
+  images: { url: string; isPrimary: boolean }[]
+  variants: { price: number; salePrice: number | null }[]
+  collection: { name: string } | null
 }
 
 export default function ProductDetailPage() {
@@ -40,16 +50,22 @@ export default function ProductDetailPage() {
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
   const [error, setError] = useState('')
+  const [related, setRelated] = useState<RelatedProduct[]>([])
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
 
-  useEffect(() => {
-    if (!slug) return
-    getProductBySlug(slug).then((data) => {
-      setProduct(data)
-      setSelectedVariant(data.variants[0] || null)
-      setLoading(false)
-    })
-  }, [slug])
+useEffect(() => {
+  if (!slug) return
+  setLoading(true)
+  setRelated([])
+
+  getProductBySlug(slug).then((data) => {
+    setProduct(data)
+    setSelectedVariant(data.variants[0] || null)
+    setLoading(false)
+  })
+
+  getRelatedProducts(slug).then(setRelated)
+}, [slug])
 
   const sortedImages = product?.images.sort((a, b) => a.position - b.position) || []
   const colors = [...new Map(product?.variants.map((v) => [v.color, v]) || []).values()]
@@ -376,6 +392,77 @@ export default function ProductDetailPage() {
         onClose={() => setSizeGuideOpen(false)}
         gender={product.gender}
       />
+      {/* Related Products */}
+      {related.length > 0 && (
+        <div style={{
+          borderTop: '1px solid #1a1a1a',
+          marginTop: '4rem',
+          paddingTop: '4rem',
+          maxWidth: '1400px',
+          margin: '4rem auto 0',
+          padding: isMobile ? '3rem 1rem 0' : '4rem 2rem 0',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
+            <div>
+              <p style={{ fontSize: '0.6rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+                You May Also Like
+              </p>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                Related
+              </h2>
+            </div>
+            <Link
+              to="/products"
+              style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', textDecoration: 'none', borderBottom: '1px solid #555', paddingBottom: '2px' }}
+            >
+              View All
+            </Link>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+            gap: '1px',
+            background: '#1a1a1a',
+          }}>
+            {related.map(p => {
+              const image = p.images.find(i => i.isPrimary)?.url || p.images[0]?.url
+              const price = p.variants[0]?.salePrice ?? p.variants[0]?.price
+              return (
+                <Link
+                  key={p.id}
+                  to={`/products/${p.slug}`}
+                  style={{ textDecoration: 'none', color: 'inherit', background: '#0a0a0a', display: 'block' }}
+                  onClick={() => window.scrollTo(0, 0)}
+                >
+                  <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: '#111' }}>
+                    {image
+                      ? <img src={image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
+                        onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                      />
+                      : <div style={{ width: '100%', height: '100%', background: '#111' }} />
+                    }
+                  </div>
+                  <div style={{ padding: '1rem' }}>
+                    <p style={{ fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff', marginBottom: '0.25rem' }}>
+                      {p.name}
+                    </p>
+                    <p style={{ fontSize: '0.7rem', color: '#888' }}>
+                      {p.collection?.name || '—'}
+                    </p>
+                    {price && (
+                      <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>
+                        R{Number(price).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
