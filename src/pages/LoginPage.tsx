@@ -4,7 +4,7 @@ import { login } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
 
 export default function LoginPage() {
-  const { setAuth } = useAuthStore()
+  const { mergeAndLogin } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ export default function LoginPage() {
     setError('')
     try {
       const data = await login(email, password)
-      setAuth(data.token, data.user)
+      await mergeAndLogin(data.token, data.user)
       window.location.href = '/'
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials')

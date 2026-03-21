@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
+import { useGuestCartStore } from '../store/useGuestCartStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useCartStore } from '../store/useCartStore'
 
 export default function Navbar() {
   const { user } = useAuthStore()
+  const { items: serverItems } = useCartStore()
+  const { items: guestItems } = useGuestCartStore()
   const { isMobile } = useBreakpoint()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -35,6 +39,9 @@ export default function Navbar() {
   useEffect(() => {
     if (!isMobile) setMenuOpen(false)
   }, [isMobile])
+
+  const cartCount = user ? serverItems.length : guestItems.length
+
   const navLinks = [
     { label: 'Shop', to: '/products' },
     { label: 'Collections', to: '/collections' },
@@ -110,7 +117,9 @@ export default function Navbar() {
               {user ? (user.name?.split(' ')[0] || 'Account') : 'Login'}
             </Link>
           )}
-          <Link to="/cart" style={linkStyle}>Cart</Link>
+          <Link to="/cart" style={linkStyle}>
+            Cart{cartCount > 0 ? ` (${cartCount})` : ''}
+          </Link>
         </div>
       </nav>
 

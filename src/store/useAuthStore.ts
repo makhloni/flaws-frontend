@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { getMe } from '../api/auth.api'
+import { mergeGuestCart } from '../api/cart.api'
 
 interface User {
   id: string
@@ -14,6 +15,7 @@ interface AuthStore {
   setAuth: (token: string, user: User) => void
   logout: () => void
   fetchMe: () => Promise<void>
+  mergeAndLogin: (token: string, user: any) => Promise<void>
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -24,6 +26,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     localStorage.setItem('token', token)
     set({ token, user })
   },
+
 
   logout: () => {
     localStorage.removeItem('token')
@@ -39,4 +42,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ token: null, user: null })
     }
   },
+
+  mergeAndLogin: async (token: string, user: any) => {
+  localStorage.setItem('token', token)
+  set({ token, user })
+
+  // Get guest cart items before clearing
+  const guestItems = JSON.parse(localStorage.getItem('flaws_guest_cart') || '[]')
+
+  if (guestItems.length > 0) {
+    try {
+      await mergeGuestCart(
+        guestItems.map((i: any) => ({
+          variantId: i.variantId,
+          productId: i.productId,
+          quantity: i.quantity,
+        }))
+      )
+    } catch {
+      // Merge failed silently — user cart still works
+    }
+    localStorage.removeItem('flaws_guest_cart')
+  }
+},
 }))

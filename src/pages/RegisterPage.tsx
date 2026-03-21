@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import { login } from '../api/auth.api'
 
 export default function RegisterPage() {
-  const { setAuth } = useAuthStore()
+  const { mergeAndLogin } = useAuthStore()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -20,8 +20,8 @@ export default function RegisterPage() {
     try {
       await register(name, email, password, phone)
       const data = await login(email, password)
-      setAuth(data.token, data.user)
-      window.location.href = '/' 
+      await mergeAndLogin(data.token, data.user)
+      window.location.href = '/'
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed')
     } finally {

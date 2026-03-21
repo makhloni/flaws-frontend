@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getProductBySlug } from '../api/products.api'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import api from '../api/axios'
+import { useGuestCartStore } from '../store/useGuestCartStore'
+import { useAuthStore } from '../store/useAuthStore'
 
 interface Variant {
   id: string
@@ -29,6 +31,8 @@ interface Product {
 export default function ProductDetailPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const { addItem: addToGuestCart } = useGuestCartStore()
+  const { user } = useAuthStore()
   const { isMobile } = useBreakpoint()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
@@ -53,19 +57,43 @@ export default function ProductDetailPage() {
   const selectedColor = selectedVariant?.color
   const sizesForColor = product?.variants.filter((v) => v.color === selectedColor) || []
 
+
   const handleAddToCart = async () => {
     if (!selectedVariant) return setError('Please select a size')
-    const token = localStorage.getItem('token')
-    if (!token) return navigate('/login')
 
     setAdding(true)
     setError('')
+
     try {
-      await api.post('/cart', {
-        productId: product!.id,
-        variantId: selectedVariant.id,
-        quantity,
-      })
+      if (user) {
+        // Logged in — add to server cart
+        await api.post('/cart', {
+          productId: product!.id,
+          variantId: selectedVariant.id,
+          quantity,
+        })
+      } else {
+        // Guest — add to local cart
+        addToGuestCart({
+          productId: product!.id,
+          variantId: selectedVariant.id,
+          quantity,
+          product: {
+            name: product!.name,
+            slug: product!.slug,
+            images: product!.images,
+          },
+          variant: {
+            id: selectedVariant.id,
+            size: selectedVariant.size,
+            color: selectedVariant.color,
+            price: selectedVariant.price,
+            salePrice: selectedVariant.salePrice,
+            stock: selectedVariant.stock,
+          },
+        })
+      }
+
       setAdded(true)
       setTimeout(() => setAdded(false), 2500)
     } catch (err: any) {

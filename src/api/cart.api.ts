@@ -8,3 +8,5 @@ export const updateCartItem = (variantId: string, quantity: number) =>
 export const removeFromCart = (variantId: string) =>
   api.delete(`/cart/${variantId}`).then(r => r.data)
 export const clearCart = () => api.delete('/cart').then(r => r.data)
+export const mergeGuestCart = (items: { variantId: string; productId: string; quantity: number }[]) =>
+  api.post('/cart/merge', { items }).then(r => r.data)

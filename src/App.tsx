@@ -18,19 +18,28 @@ import AccountPage from './pages/AccountPage'
 import CollectionsPage from './pages/CollectionsPage'
 import CollectionDetailPage from './pages/CollectionDetailPage'
 import { useContentStore } from './store/useContentStore'
-
+import { useGuestCartStore } from './store/useGuestCartStore'
 
 export default function App() {
   const { fetchMe, token } = useAuthStore()
   const { fetch: fetchContent } = useContentStore()
+  const { load: loadGuestCart } = useGuestCartStore()
 
   useEffect(() => {
     if (token) fetchMe()
   }, [])
+
   useEffect(() => {
     if (token) fetchMe()
     fetchContent()
   }, [])
+
+  useEffect(() => {
+    if (token) fetchMe()
+    fetchContent()
+    loadGuestCart()
+  }, [])
+
 
   return (
     <BrowserRouter>
