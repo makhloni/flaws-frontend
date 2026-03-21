@@ -15,7 +15,7 @@ interface Product {
 
 export default function HomePage() {
   const { isMobile } = useBreakpoint()
-  const { content } = useContentStore()
+  const { content, loading: contentLoading } = useContentStore()
   const [featured, setFeatured] = useState<Product[]>([])
 
   useEffect(() => {
@@ -37,8 +37,8 @@ export default function HomePage() {
     })
   }, [content])
 
-  const heroHeadline = content?.hero_headline || 'FLAWS'
-  const heroSubtext = content?.hero_subtext || 'New Season — 2026'
+  const heroHeadline = content?.hero_headline || ''
+  const heroSubtext = content?.hero_subtext || ''
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
@@ -53,25 +53,29 @@ export default function HomePage() {
         padding: isMobile ? '0 1.5rem' : '0 4rem',
         textAlign: 'center',
       }}>
-        <p style={{
-          fontSize: isMobile ? '0.6rem' : '0.7rem',
-          letterSpacing: '0.3em',
-          textTransform: 'uppercase',
-          color: '#888',
-          marginBottom: '1.5rem',
-        }}>
-          {heroSubtext}
-        </p>
-        <h1 style={{
-          fontSize: isMobile ? 'clamp(3rem, 15vw, 5rem)' : 'clamp(4rem, 10vw, 9rem)',
-          fontWeight: 900,
-          letterSpacing: isMobile ? '0.1em' : '0.2em',
-          textTransform: 'uppercase',
-          lineHeight: 0.9,
-          marginBottom: '2rem',
-        }}>
-          {heroHeadline}
-        </h1>
+        {!contentLoading && (
+          <p style={{
+            fontSize: isMobile ? '0.6rem' : '0.7rem',
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+            color: '#888',
+            marginBottom: '1.5rem',
+          }}>
+            {heroSubtext}
+          </p>
+        )}
+        {!contentLoading && (
+          <h1 style={{
+            fontSize: isMobile ? 'clamp(3rem, 15vw, 5rem)' : 'clamp(4rem, 10vw, 9rem)',
+            fontWeight: 900,
+            letterSpacing: isMobile ? '0.1em' : '0.2em',
+            textTransform: 'uppercase',
+            lineHeight: 0.9,
+            marginBottom: '2rem',
+          }}>
+            {heroHeadline}
+          </h1>
+        )}
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <Link to="/products" style={{
             padding: isMobile ? '0.9rem 2rem' : '1rem 3rem',
