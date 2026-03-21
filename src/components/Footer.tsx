@@ -26,6 +26,8 @@ export default function Footer() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <Link to="/account" style={footerLink}>My Account</Link>
               <Link to="/orders" style={footerLink}>Orders</Link>
+              <Link to="/contact" style={footerLink}>Contact</Link>
+              <Link to="/returns" style={footerLink}>Returns & Refunds</Link>
             </div>
           </div>
 

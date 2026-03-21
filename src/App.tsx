@@ -17,6 +17,8 @@ import OrdersPage from './pages/OrdersPage'
 import AccountPage from './pages/AccountPage'
 import CollectionsPage from './pages/CollectionsPage'
 import CollectionDetailPage from './pages/CollectionDetailPage'
+import ReturnsPolicyPage from './pages/ReturnsPolicyPage'
+import ContactPage from './pages/ContactPage'
 import { useContentStore } from './store/useContentStore'
 import { useGuestCartStore } from './store/useGuestCartStore'
 
@@ -60,6 +62,8 @@ export default function App() {
           <Route path="/account" element={<AccountPage />} />
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/collections/:slug" element={<CollectionDetailPage />} />
+          <Route path="/returns" element={<ReturnsPolicyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </main>
       <Footer />
