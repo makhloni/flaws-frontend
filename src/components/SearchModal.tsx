@@ -17,6 +17,23 @@ interface SearchModalProps {
   onClose: () => void
 }
 
+const SearchIcon = ({ size = 18, color = '#555' }: { size?: number; color?: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ flexShrink: 0 }}
+  >
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)
+
 export default function SearchModal({ open, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Product[]>([])
@@ -94,9 +111,16 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
         overflowY: 'auto',
       }}>
 
-        {/* Search input */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-          <span style={{ color: '#555', fontSize: '1rem' }}>⌕</span>
+        {/* Search input row */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          borderBottom: '1px solid #1a1a1a',
+          paddingBottom: '1.25rem',
+          marginBottom: '1.5rem',
+        }}>
+          <SearchIcon size={20} color="#555" />
           <input
             ref={inputRef}
             type="text"
@@ -114,33 +138,80 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
               fontFamily: 'inherit',
             }}
           />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#555',
+                cursor: 'pointer',
+                fontSize: '0.7rem',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                padding: '4px 8px',
+              }}
+            >
+              Clear
+            </button>
+          )}
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '1rem', padding: '4px' }}
+            style={{
+              background: 'none',
+              border: '1px solid #1a1a1a',
+              color: '#888',
+              cursor: 'pointer',
+              fontSize: '0.65rem',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              padding: '6px 12px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = '#fff'
+              e.currentTarget.style.color = '#fff'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = '#1a1a1a'
+              e.currentTarget.style.color = '#888'
+            }}
           >
-            ✕
+            Close
           </button>
         </div>
 
-        {/* Results */}
+        {/* Loading */}
         {loading && (
           <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', padding: '1rem 0' }}>
             Searching...
           </p>
         )}
 
+        {/* No results */}
         {!loading && query && results.length === 0 && (
-          <p style={{ fontSize: '0.75rem', color: '#555', padding: '1rem 0' }}>
-            No results for "<span style={{ color: '#888' }}>{query}</span>"
-          </p>
+          <div style={{ padding: '2rem 0' }}>
+            <p style={{ fontSize: '0.75rem', color: '#555' }}>
+              No results for <span style={{ color: '#888' }}>"{query}"</span>
+            </p>
+            <p style={{ fontSize: '0.7rem', color: '#444', marginTop: '0.5rem' }}>
+              Try a different search term or browse our collections.
+            </p>
+          </div>
         )}
 
+        {/* Results */}
         {!loading && results.length > 0 && (
           <div>
-            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', marginBottom: '1rem' }}>
-              {results.length} result{results.length !== 1 ? 's' : ''}
+            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', marginBottom: '1.25rem' }}>
+              {results.length} result{results.length !== 1 ? 's' : ''} for "{query}"
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1px', background: '#1a1a1a' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+              gap: '1px',
+              background: '#1a1a1a',
+            }}>
               {results.map(product => {
                 const image = product.images.find(i => i.isPrimary)?.url || product.images[0]?.url
                 const price = product.variants[0]?.salePrice ?? product.variants[0]?.price
@@ -151,17 +222,25 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
                     onClick={onClose}
                     style={{ textDecoration: 'none', color: 'inherit', background: '#0a0a0a', display: 'block' }}
                   >
-                    <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: '#111' }}>
+                    <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: '#111', position: 'relative' }}>
                       {image
-                        ? <img src={image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? (
+                          <img
+                            src={image}
+                            alt={product.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
+                            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                          />
+                        )
                         : <div style={{ width: '100%', height: '100%', background: '#111' }} />
                       }
                     </div>
-                    <div style={{ padding: '0.75rem' }}>
+                    <div style={{ padding: '0.75rem', background: '#0a0a0a' }}>
                       <p style={{ fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fff', marginBottom: '0.25rem' }}>
                         {product.name}
                       </p>
-                      <p style={{ fontSize: '0.65rem', color: '#888' }}>
+                      <p style={{ fontSize: '0.65rem', color: '#555' }}>
                         {product.collection?.name || product.gender}
                       </p>
                       {price && (
@@ -177,6 +256,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
           </div>
         )}
 
+        {/* Empty state — popular searches */}
         {!query && (
           <div>
             <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', marginBottom: '1rem' }}>
@@ -196,6 +276,15 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
                     letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                     cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = '#fff'
+                    e.currentTarget.style.color = '#fff'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = '#1a1a1a'
+                    e.currentTarget.style.color = '#888'
                   }}
                 >
                   {term}

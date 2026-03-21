@@ -96,6 +96,7 @@ export default function Navbar() {
           FLAWS
         </Link>
 
+
         {/* Right */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1.5rem' }}>
           {!isMobile && (
@@ -103,8 +104,10 @@ export default function Navbar() {
               {user ? (user.name?.split(' ')[0] || 'Account') : 'Login'}
             </Link>
           )}
+
           <button
             onClick={() => setSearchOpen(true)}
+            aria-label="Search"
             style={{
               background: 'none',
               border: 'none',
@@ -113,13 +116,28 @@ export default function Navbar() {
               padding: '4px',
               display: 'flex',
               alignItems: 'center',
-              fontSize: '1.1rem',
-              lineHeight: 1,
+              justifyContent: 'center',
+              opacity: 0.8,
+              transition: 'opacity 0.2s',
             }}
-            aria-label="Search"
+            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '0.8')}
           >
-            ⌕
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
           </button>
+
           <Link to="/cart" style={linkStyle}>
             Cart{cartCount > 0 ? ` (${cartCount})` : ''}
           </Link>
@@ -178,8 +196,24 @@ export default function Navbar() {
               padding: '1.25rem 0',
               textAlign: 'left',
               width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
             }}
           >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             Search
           </button>
 
