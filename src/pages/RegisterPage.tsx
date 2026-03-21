@@ -72,7 +72,6 @@ export default function RegisterPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
               style={inputStyle}
             />
           </div>
@@ -82,7 +81,6 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
               style={inputStyle}
             />
           </div>
@@ -92,7 +90,6 @@ export default function RegisterPage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+27 82 000 0000"
               style={inputStyle}
             />
           </div>
@@ -103,7 +100,6 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              placeholder="••••••••"
               style={inputStyle}
             />
           </div>
