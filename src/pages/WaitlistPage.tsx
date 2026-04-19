@@ -1,0 +1,440 @@
+import { useState, useEffect, useRef } from 'react'
+import axios from 'axios'
+
+const API = import.meta.env.VITE_API_URL || 'https://flaws-backend-production.up.railway.app'
+
+const INTERESTS = [
+  { id: 'STREETWEAR', label: 'Streetwear' },
+  { id: 'FOOTWEAR', label: 'Footwear' },
+  { id: 'ACCESSORIES', label: 'Accessories' },
+  { id: 'ALL', label: 'All of it' },
+]
+
+const SA_PROVINCES = [
+  'Gauteng',
+  'Western Cape',
+  'KwaZulu-Natal',
+  'Eastern Cape',
+  'Limpopo',
+  'Mpumalanga',
+  'North West',
+  'Free State',
+  'Northern Cape',
+]
+
+export default function WaitlistPage() {
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    city: '',
+    province: '',
+    interests: [] as string[],
+  })
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [mounted, setMounted] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+
+    // Subtle grain animation
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let animFrame: number
+
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const drawGrain = () => {
+      const { width, height } = canvas
+      const imageData = ctx.createImageData(width, height)
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const val = Math.random() * 255
+        data[i] = val
+        data[i + 1] = val
+        data[i + 2] = val
+        data[i + 3] = 8 // very subtle
+      }
+      ctx.putImageData(imageData, 0, 0)
+      animFrame = requestAnimationFrame(drawGrain)
+    }
+    drawGrain()
+
+    return () => {
+      cancelAnimationFrame(animFrame)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
+  const toggleInterest = (id: string) => {
+    setForm(prev => ({
+      ...prev,
+      interests: prev.interests.includes(id)
+        ? prev.interests.filter(i => i !== id)
+        : [...prev.interests, id],
+    }))
+  }
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.email || !form.city || !form.province) {
+      setErrorMsg('Please fill in all fields')
+      return
+    }
+    setStatus('loading')
+    setErrorMsg('')
+    try {
+      await axios.post(`${API}/waitlist`, form)
+      setStatus('success')
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Something went wrong'
+      setErrorMsg(msg)
+      setStatus('error')
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'relative',
+      minHeight: '100vh',
+      background: '#0a0a0a',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    }}>
+
+      {/* Grain overlay */}
+      <canvas ref={canvasRef} style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        mixBlendMode: 'overlay',
+      }} />
+
+      {/* Subtle radial glow */}
+      <div style={{
+        position: 'fixed',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '600px', height: '600px',
+        background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      <div style={{
+        position: 'relative',
+        zIndex: 1,
+        width: '100%',
+        maxWidth: '480px',
+        padding: '2rem 1.5rem',
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'opacity 0.8s ease, transform 0.8s ease',
+      }}>
+
+        {status === 'success' ? (
+          <SuccessState name={form.name} />
+        ) : (
+          <>
+            {/* Logo */}
+            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+              <h1 style={{
+                margin: 0,
+                fontSize: '2.5rem',
+                fontWeight: 900,
+                letterSpacing: '0.5em',
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                paddingLeft: '0.5em', // offset for letter-spacing
+              }}>
+                FLAWS
+              </h1>
+            </div>
+
+            {/* Headline */}
+            <div style={{
+              borderTop: '1px solid #1a1a1a',
+              borderBottom: '1px solid #1a1a1a',
+              padding: '2rem 0',
+              marginBottom: '2.5rem',
+              textAlign: 'center',
+            }}>
+              <p style={{
+                margin: '0 0 0.75rem',
+                fontSize: '0.6rem',
+                letterSpacing: '0.3em',
+                textTransform: 'uppercase',
+                color: '#555',
+              }}>
+                Coming Soon
+              </p>
+              <h2 style={{
+                margin: '0 0 0.75rem',
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: '#ffffff',
+                lineHeight: 1.3,
+              }}>
+                Something is coming
+              </h2>
+              <p style={{
+                margin: 0,
+                fontSize: '0.75rem',
+                color: '#555',
+                lineHeight: 1.8,
+                letterSpacing: '0.03em',
+              }}>
+                Get early access, exclusive drops, and member pricing<br />
+                before we open to everyone.
+              </p>
+            </div>
+
+            {/* Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+
+              {/* Name */}
+              <div>
+                <p style={labelStyle}>Full Name</p>
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = '#333')}
+                  onBlur={e => (e.target.style.borderColor = '#1a1a1a')}
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <p style={labelStyle}>Email Address</p>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = '#333')}
+                  onBlur={e => (e.target.style.borderColor = '#1a1a1a')}
+                />
+              </div>
+
+              {/* City + Province */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <p style={labelStyle}>City</p>
+                  <input
+                    type="text"
+                    placeholder="Johannesburg"
+                    value={form.city}
+                    onChange={e => setForm({ ...form, city: e.target.value })}
+                    style={inputStyle}
+                    onFocus={e => (e.target.style.borderColor = '#333')}
+                    onBlur={e => (e.target.style.borderColor = '#1a1a1a')}
+                  />
+                </div>
+                <div>
+                  <p style={labelStyle}>Province</p>
+                  <select
+                    value={form.province}
+                    onChange={e => setForm({ ...form, province: e.target.value })}
+                    style={{
+                      ...inputStyle,
+                      appearance: 'none' as any,
+                      cursor: 'pointer',
+                      color: form.province ? '#ffffff' : '#444',
+                    }}
+                  >
+                    <option value="" disabled>Select</option>
+                    {SA_PROVINCES.map(p => (
+                      <option key={p} value={p} style={{ background: '#111', color: '#fff' }}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Interests */}
+              <div>
+                <p style={labelStyle}>I'm interested in</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {INTERESTS.map(item => {
+                    const selected = form.interests.includes(item.id)
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => toggleInterest(item.id)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: selected ? '#ffffff' : 'transparent',
+                          color: selected ? '#0a0a0a' : '#555',
+                          border: selected ? '1px solid #ffffff' : '1px solid #1a1a1a',
+                          fontSize: '0.6rem',
+                          letterSpacing: '0.15em',
+                          textTransform: 'uppercase',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          fontWeight: selected ? 700 : 400,
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Error */}
+            {errorMsg && (
+              <p style={{
+                fontSize: '0.7rem',
+                color: '#ff6b6b',
+                marginBottom: '1rem',
+                letterSpacing: '0.05em',
+              }}>
+                {errorMsg}
+              </p>
+            )}
+
+            {/* Submit */}
+            <button
+              onClick={handleSubmit}
+              disabled={status === 'loading'}
+              style={{
+                width: '100%',
+                padding: '1.25rem',
+                background: status === 'loading' ? '#1a1a1a' : '#ffffff',
+                color: status === 'loading' ? '#444' : '#0a0a0a',
+                border: 'none',
+                fontSize: '0.65rem',
+                letterSpacing: '0.25em',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s',
+              }}
+            >
+              {status === 'loading' ? 'Joining...' : 'Join the Waitlist'}
+            </button>
+
+            <p style={{
+              textAlign: 'center',
+              marginTop: '1.5rem',
+              fontSize: '0.6rem',
+              color: '#333',
+              letterSpacing: '0.1em',
+            }}>
+              No spam. Just FLAWS.
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function SuccessState({ name }: { name: string }) {
+  return (
+    <div style={{
+      textAlign: 'center',
+      animation: 'fadeIn 0.6s ease',
+    }}>
+      <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
+      <h1 style={{
+        margin: '0 0 3rem',
+        fontSize: '2.5rem',
+        fontWeight: 900,
+        letterSpacing: '0.5em',
+        textTransform: 'uppercase',
+        color: '#ffffff',
+        paddingLeft: '0.5em',
+      }}>
+        FLAWS
+      </h1>
+
+      <div style={{
+        borderTop: '1px solid #1a1a1a',
+        borderBottom: '1px solid #1a1a1a',
+        padding: '2.5rem 0',
+        marginBottom: '2rem',
+      }}>
+        <p style={{
+          margin: '0 0 0.75rem',
+          fontSize: '0.6rem',
+          letterSpacing: '0.3em',
+          textTransform: 'uppercase',
+          color: '#555',
+        }}>
+          You're in
+        </p>
+        <h2 style={{
+          margin: '0 0 1rem',
+          fontSize: '1.25rem',
+          fontWeight: 700,
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          color: '#ffffff',
+        }}>
+          Welcome, {name.split(' ')[0]}
+        </h2>
+        <p style={{
+          margin: 0,
+          fontSize: '0.75rem',
+          color: '#555',
+          lineHeight: 1.9,
+        }}>
+          Check your inbox — we've sent you a confirmation.<br />
+          You'll hear from us before anyone else.
+        </p>
+      </div>
+
+      <p style={{
+        fontSize: '0.6rem',
+        color: '#333',
+        letterSpacing: '0.15em',
+        textTransform: 'uppercase',
+      }}>
+        © 2026 FLAWS — South Africa
+      </p>
+    </div>
+  )
+}
+
+const labelStyle: React.CSSProperties = {
+  margin: '0 0 8px',
+  fontSize: '0.6rem',
+  letterSpacing: '0.2em',
+  textTransform: 'uppercase',
+  color: '#555',
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.9rem 1rem',
+  background: '#0f0f0f',
+  border: '1px solid #1a1a1a',
+  color: '#ffffff',
+  fontSize: '0.85rem',
+  outline: 'none',
+  boxSizing: 'border-box',
+  transition: 'border-color 0.2s',
+  fontFamily: 'inherit',
+}
