@@ -103,7 +103,7 @@ export default function WaitlistPage() {
               <img
                 src={flawsLogo}
                 alt="FLAWS"
-                style={{ width: '160px', height: 'auto' }}
+                style={{ width: '420px', height: 'auto', margin: 'auto 0' }}
                 onError={e => {
                   // Fallback to text logo if image not found
                   const target = e.target as HTMLImageElement
