@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import flawsLogo from '../assets/flaws-logo.png'
 
 const API = import.meta.env.VITE_API_URL || 'https://flaws-backend-production.up.railway.app'
 
@@ -100,7 +101,7 @@ export default function WaitlistPage() {
             {/* FLAWS Logo Image */}
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <img
-                src="/assets/flaws-logo.png"
+                src={flawsLogo}
                 alt="FLAWS"
                 style={{ width: '160px', height: 'auto' }}
                 onError={e => {
