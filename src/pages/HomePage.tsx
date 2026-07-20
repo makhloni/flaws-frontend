@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import axios from '../api/axios'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useContentStore } from '../store/useContentStore'
+import flawsLogo from '../assets/flaws-logo.png'
+import flawsExtra from '../assets/Flaws-extra.jpeg'
 
 interface Product {
   id: string
@@ -44,63 +46,202 @@ export default function HomePage() {
     <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
 
       {/* Hero */}
+      {/* Hero - Three Panel Layout */}
       <div style={{
-        height: '100svh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0 1.5rem' : '0 4rem',
-        textAlign: 'center',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+        minHeight: '100svh',
+        background: '#0a0a0a',
       }}>
-        {!contentLoading && (
+
+        {/* Left Panel - Lifestyle Image */}
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: isMobile ? '60svh' : '100svh',
+          background: '#111',
+          overflow: 'hidden',
+          textAlign: 'center',
+          gap: '1.5rem',
+        }}>
+          {/* Background image fills the panel */}
+          <img
+            src={flawsExtra}
+            alt="FLAWS Extra"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+
+          {/* Optional dark overlay so text stays legible over the photo */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.15))',
+          }} />
+
+          {/* Text overlay - centered */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <h2 style={{
+              fontSize: isMobile ? '2.5rem' : '3rem',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              color: '#ffffff',
+              letterSpacing: '0.05em',
+              lineHeight: 1,
+              marginBottom: '1.5rem',
+            }}>
+              FLAWS<br />Extra
+            </h2>
+            <Link to="/collections" style={{
+              display: 'inline-block',
+              background: '#ffffff',
+              color: '#0a0a0a',
+              padding: '1rem 2rem',
+              fontSize: '0.65rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+              textDecoration: 'none',
+            }}>
+              Shop Now →
+            </Link>
+          </div>
+        </div>
+
+        {/* Middle Panel - Brand Statement */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '3rem 2rem',
+          borderLeft: isMobile ? 'none' : '1px solid #1a1a1a',
+          borderRight: isMobile ? 'none' : '1px solid #1a1a1a',
+          borderTop: isMobile ? '1px solid #1a1a1a' : 'none',
+          minHeight: isMobile ? '50svh' : '100svh',
+          textAlign: 'center',
+          gap: '2rem',
+        }}>
           <p style={{
-            fontSize: isMobile ? '0.6rem' : '0.7rem',
+            fontSize: isMobile ? '1.6rem' : '2.2rem',
+            fontWeight: 300,
+            letterSpacing: '0.05em',
+            color: '#ffffff',
+            lineHeight: 1.4,
+          }}>
+            Welcome to FLAWS.
+          </p>
+
+          {/* Script logo — replace with your actual image file */}
+          <img
+            src={flawsLogo}
+            alt="FLAWS main collection"
+            style={{
+              width: isMobile ? '200px' : '320px',
+            }}
+          />
+
+          {/* Social Icons */}
+          <div style={{
+            display: 'flex',
+            gap: '1.5rem',
+            alignItems: 'center',
+          }}>
+            {/* Instagram */}
+            <a
+              href="https://instagram.com/flawswrldwide"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#ffffff', opacity: 0.7, transition: 'opacity 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+              </svg>
+            </a>
+
+            {/* X / Twitter */}
+            <a
+              href="https://x.com/@flawswrldwide"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#ffffff', opacity: 0.7, transition: 'opacity 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </a>
+
+            {/* TikTok */}
+            <a
+              href="https://tiktok.com/@flawswrldwide"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#ffffff', opacity: 0.7, transition: 'opacity 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        {/* Right Panel - Collection Teaser */}
+        <div style={{
+          background: '#c4b49a',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: isMobile ? '50svh' : '100svh',
+          padding: '3rem 2rem',
+          textAlign: 'center',
+          gap: '1.5rem',
+          borderTop: isMobile ? '1px solid #1a1a1a' : 'none',
+        }}>
+          {/* Main collection script logo — replace with actual file */}
+          <img
+            src={flawsLogo}
+            alt="FLAWS main collection"
+            style={{
+              width: isMobile ? '140px' : '200px',
+            }}
+          />
+
+          <p style={{
+            fontSize: '0.6rem',
             letterSpacing: '0.3em',
             textTransform: 'uppercase',
-            color: '#888',
-            marginBottom: '1.5rem',
+            color: '#3a3028',
           }}>
-            {heroSubtext}
+            main collection
           </p>
-        )}
-        {!contentLoading && (
-          <h1 style={{
-            fontSize: isMobile ? 'clamp(3rem, 15vw, 5rem)' : 'clamp(4rem, 10vw, 9rem)',
-            fontWeight: 900,
-            letterSpacing: isMobile ? '0.1em' : '0.2em',
-            textTransform: 'uppercase',
-            lineHeight: 0.9,
-            marginBottom: '2rem',
-          }}>
-            {heroHeadline}
-          </h1>
-        )}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Link to="/products" style={{
-            padding: isMobile ? '0.9rem 2rem' : '1rem 3rem',
-            background: '#ffffff',
-            color: '#0a0a0a',
-            textDecoration: 'none',
-            fontSize: '0.65rem',
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            fontWeight: 600,
-          }}>
-            Shop Now
-          </Link>
-          <Link to="/collections" style={{
-            padding: isMobile ? '0.9rem 2rem' : '1rem 3rem',
-            border: '1px solid #ffffff',
+
+          <p style={{
+            fontSize: isMobile ? '1.3rem' : '1.6rem',
+            fontWeight: 700,
             color: '#ffffff',
-            textDecoration: 'none',
-            fontSize: '0.65rem',
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
           }}>
-            Collections
-          </Link>
+            Coming Soon!
+          </p>
         </div>
+
       </div>
 
       {/* Featured Products */}
