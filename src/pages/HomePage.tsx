@@ -17,7 +17,7 @@ interface Product {
 
 export default function HomePage() {
   const { isMobile } = useBreakpoint()
-  const { content, loading: contentLoading } = useContentStore()
+  const { content } = useContentStore()
   const [featured, setFeatured] = useState<Product[]>([])
 
   useEffect(() => {
@@ -39,8 +39,6 @@ export default function HomePage() {
     })
   }, [content])
 
-  const heroHeadline = content?.hero_headline || ''
-  const heroSubtext = content?.hero_subtext || ''
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
