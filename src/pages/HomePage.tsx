@@ -102,7 +102,7 @@ export default function HomePage() {
             }}>
               FLAWS<br />Extra
             </h2>
-            <Link to="/collections" style={{
+            <Link to="/collections/flaws-extra" style={{
               display: 'inline-block',
               background: '#ffffff',
               color: '#0a0a0a',
