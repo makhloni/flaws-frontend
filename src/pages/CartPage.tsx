@@ -25,7 +25,7 @@ export default function CartPage() {
     const price = item.variant.salePrice ?? item.variant.price
     return sum + price * item.quantity
   }, 0)
-  const guestShipping = guestSubtotal >= 1000 ? 0 : 100
+  const guestShipping = guestSubtotal >= 1500 ? 0 : 100
   const guestTotal = guestSubtotal + guestShipping
 
   if (loading && user) return (
@@ -138,7 +138,7 @@ export default function CartPage() {
               </div>
 
               {(isGuest ? guestShipping : shipping) > 0 && (
-                <p style={{ fontSize: '0.65rem', color: '#555', marginBottom: '1rem' }}>Free shipping on orders over R1000</p>
+                <p style={{ fontSize: '0.65rem', color: '#555', marginBottom: '1rem' }}>Free shipping on orders over R1500</p>
               )}
 
               <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between' }}>
