@@ -4,6 +4,7 @@ import { useCartStore } from '../store/useCartStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getAddresses, addAddress } from '../api/address.api'
 import { initializePayment } from '../api/payment.api'
+import { getShippingRates } from '../api/shipping.api'
 
 interface Address {
   id: string
@@ -14,6 +15,12 @@ interface Address {
   postalCode: string
   country: string
   isDefault: boolean
+}
+
+interface Rate {
+  serviceLevelCode: string
+  serviceLevelName: string
+  price: number
 }
 
 export default function CheckoutPage() {
@@ -27,6 +34,9 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [searchParams] = useSearchParams()
 
+  const [rates, setRates] = useState<Rate[]>([])
+  const [ratesLoading, setRatesLoading] = useState(false)
+  const [selectedService, setSelectedService] = useState<string>('')
 
   const [form, setForm] = useState({
     fullName: '',
@@ -54,6 +64,27 @@ export default function CheckoutPage() {
     })
   }, [])
 
+  // Fetch shipping rates whenever the selected address changes
+  useEffect(() => {
+    if (!selectedAddress) {
+      setRates([])
+      setSelectedService('')
+      return
+    }
+    setRatesLoading(true)
+    setSelectedService('')
+    getShippingRates(selectedAddress)
+      .then((data) => {
+        setRates(data)
+        if (data.length > 0) setSelectedService(data[0].serviceLevelCode)
+      })
+      .catch(() => {
+        setRates([])
+        setError('Could not load delivery options for this address')
+      })
+      .finally(() => setRatesLoading(false))
+  }, [selectedAddress])
+
   const handleAddAddress = async () => {
     if (!form.fullName || !form.street || !form.city || !form.province || !form.postalCode) {
       return setError('All address fields are required')
@@ -71,15 +102,15 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) return setError('Please select a delivery address')
+    if (!selectedService) return setError('Please select a delivery option')
     if (items.length === 0) return setError('Your cart is empty')
 
     setPlacing(true)
     setError('')
 
     try {
-      const data = await initializePayment(selectedAddress)
+      const data = await initializePayment(selectedAddress, selectedService)
 
-      // Build a hidden form and submit to PayFast
       const form = document.createElement('form')
       form.method = 'POST'
       form.action = data.payFastUrl
@@ -94,7 +125,6 @@ export default function CheckoutPage() {
 
       document.body.appendChild(form)
       form.submit()
-      // Page navigates away — no need to setPlacing(false)
     } catch (err: any) {
       console.error('Payment error:', err)
       setError(err.response?.data?.message || 'Failed to initialize payment')
@@ -102,7 +132,8 @@ export default function CheckoutPage() {
     }
   }
 
-  const shipping = Number(total) >= 1000 ? 0 : 100
+  const selectedRate = rates.find((r) => r.serviceLevelCode === selectedService)
+  const shipping = selectedRate ? selectedRate.price : 0
   const orderTotal = Number(total) + shipping
 
   return (
@@ -126,7 +157,7 @@ export default function CheckoutPage() {
           alignItems: 'flex-start',
         }}>
 
-          {/* Left — Address */}
+          {/* Left — Address + Delivery Options */}
           <div style={{ flex: 1, width: '100%' }}>
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '1.5rem' }}>
               Delivery Address
@@ -234,6 +265,52 @@ export default function CheckoutPage() {
                 </div>
               </div>
             )}
+
+            {/* Delivery Options */}
+            {selectedAddress && (
+              <div style={{ marginTop: '3rem' }}>
+                <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '1.5rem' }}>
+                  Delivery Option
+                </p>
+
+                {ratesLoading && (
+                  <p style={{ fontSize: '0.75rem', color: '#888' }}>Loading delivery options...</p>
+                )}
+
+                {!ratesLoading && rates.length === 0 && (
+                  <p style={{ fontSize: '0.75rem', color: '#888' }}>
+                    No delivery options available for this address.
+                  </p>
+                )}
+
+                {!ratesLoading && rates.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {rates.map((rate) => (
+                      <div
+                        key={rate.serviceLevelCode}
+                        onClick={() => setSelectedService(rate.serviceLevelCode)}
+                        style={{
+                          padding: '1.25rem 1.5rem',
+                          border: selectedService === rate.serviceLevelCode ? '1px solid #ffffff' : '1px solid #1a1a1a',
+                          cursor: 'pointer',
+                          transition: 'border 0.2s',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {rate.serviceLevelName}
+                        </p>
+                        <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                          {rate.price === 0 ? 'Free' : `R${rate.price.toFixed(2)}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right — Order Summary */}
@@ -279,7 +356,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <p style={{ fontSize: '0.75rem', color: '#888' }}>Shipping</p>
                 <p style={{ fontSize: '0.75rem', color: shipping === 0 ? '#888' : '#fff' }}>
-                  {shipping === 0 ? 'Free' : 'R100.00'}
+                  {selectedRate ? (shipping === 0 ? 'Free' : `R${shipping.toFixed(2)}`) : '—'}
                 </p>
               </div>
               <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
@@ -294,18 +371,18 @@ export default function CheckoutPage() {
 
             <button
               onClick={handlePlaceOrder}
-              disabled={placing || items.length === 0}
+              disabled={placing || items.length === 0 || !selectedService}
               style={{
                 width: '100%',
                 padding: '1.25rem',
-                background: placing ? '#333' : '#ffffff',
-                color: placing ? '#888' : '#0a0a0a',
+                background: placing || !selectedService ? '#333' : '#ffffff',
+                color: placing || !selectedService ? '#888' : '#0a0a0a',
                 border: 'none',
                 fontSize: '0.7rem',
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 fontWeight: 600,
-                cursor: placing ? 'not-allowed' : 'pointer',
+                cursor: placing || !selectedService ? 'not-allowed' : 'pointer',
                 transition: 'all 0.3s',
               }}
             >

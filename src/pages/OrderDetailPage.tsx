@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getOrderById } from '../api/orders.api'
+import { getOrderById, getOrderTracking } from '../api/orders.api'
 
 interface OrderItem {
   id: string
@@ -44,6 +44,10 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const [tracking, setTracking] = useState<any>(null)
+  const [trackingLoading, setTrackingLoading] = useState(false)
+  const [trackingError, setTrackingError] = useState('')
+
   useEffect(() => {
     if (!id) return
     getOrderById(id).then((data) => {
@@ -51,6 +55,20 @@ export default function OrderDetailPage() {
       setLoading(false)
     })
   }, [id])
+
+  useEffect(() => {
+    if (!order?.trackingNumber || !id) return
+    setTrackingLoading(true)
+    getOrderTracking(id)
+      .then((data) => {
+        setTracking(data)
+        setTrackingError('')
+      })
+      .catch(() => {
+        setTrackingError('Could not load tracking status right now')
+      })
+      .finally(() => setTrackingLoading(false))
+  }, [order?.trackingNumber, id])
 
   if (loading) return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -203,12 +221,30 @@ export default function OrderDetailPage() {
         {/* Tracking */}
         {order.trackingNumber && (
           <div style={{ border: '1px solid #1a1a1a', padding: '1.5rem', marginBottom: '3rem' }}>
-            <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
-              Tracking Number
-            </p>
-            <p style={{ fontSize: '0.9rem', fontFamily: 'monospace', color: '#fff' }}>
-              {order.trackingNumber}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+              <div>
+                <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+                  Tracking Number
+                </p>
+                <p style={{ fontSize: '0.9rem', fontFamily: 'monospace', color: '#fff' }}>
+                  {order.trackingNumber}
+                </p>
+              </div>
+            </div>
+
+            {trackingLoading && (
+              <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '1rem' }}>Loading tracking status...</p>
+            )}
+
+            {trackingError && (
+              <p style={{ fontSize: '0.7rem', color: '#ff6b6b', marginTop: '1rem' }}>{trackingError}</p>
+            )}
+
+            {tracking?.status && (
+              <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1rem', marginTop: '1rem' }}>
+                <TrackingStatus status={tracking.status} />
+              </div>
+            )}
           </div>
         )}
 
@@ -245,6 +281,55 @@ export default function OrderDetailPage() {
           </Link>
         </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Renders whatever tracking status fields are present, defensively.
+ * The exact response shape from Courier Guy's tracking endpoint hasn't
+ * been confirmed against a real sandbox call yet — once it has, this
+ * can be replaced with a proper field-by-field layout (timeline of
+ * events, current location, ETA, etc.) instead of a generic dump.
+ */
+function TrackingStatus({ status }: { status: any }) {
+  // Common-sense guesses at likely field names — shown only if present.
+  const currentStatus = status.status || status.current_status || status.tracking_status
+  const events = status.tracking_events || status.events || status.history
+
+  if (!currentStatus && !events) {
+    // Unknown shape — show raw JSON rather than nothing, so it's at
+    // least useful for debugging until the real shape is confirmed.
+    return (
+      <pre style={{ fontSize: '0.65rem', color: '#888', whiteSpace: 'pre-wrap', overflow: 'auto' }}>
+        {JSON.stringify(status, null, 2)}
+      </pre>
+    )
+  }
+
+  return (
+    <div>
+      {currentStatus && (
+        <p style={{ fontSize: '0.75rem', color: '#fff', marginBottom: '1rem' }}>
+          Current status: <span style={{ color: '#9C27B0' }}>{currentStatus}</span>
+        </p>
+      )}
+      {Array.isArray(events) && events.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {events.map((event: any, i: number) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+              <p style={{ fontSize: '0.7rem', color: '#ccc' }}>
+                {event.description || event.status || event.message}
+              </p>
+              <p style={{ fontSize: '0.65rem', color: '#555', whiteSpace: 'nowrap' }}>
+                {event.timestamp || event.date
+                  ? new Date(event.timestamp || event.date).toLocaleDateString('en-ZA')
+                  : ''}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
