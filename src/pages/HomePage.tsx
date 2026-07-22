@@ -225,7 +225,7 @@ export default function HomePage() {
           {[
             {
               label: 'Free Shipping',
-              detail: 'On orders over R1000',
+              detail: 'On orders over R1500',
               icon: (
                 <path d="M3 7h13l4 4v6h-2M3 7v10h2m10-10v10M9 17a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z" />
               ),
