@@ -1,53 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from '../api/axios'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useContentStore } from '../store/useContentStore'
 import flawsLogo from '../assets/flaws-logo.png'
 import flawsExtra from '../assets/Flaws-extra.jpeg'
+import mainCollectionImage from '../assets/main-collection.jpg'
+import newsletterImage from '../assets/img-2.jpeg'
+
+const RED = '#C1272D'
 
 interface Product {
   id: string
   name: string
   slug: string
   isFeatured: boolean
+  createdAt: string
   images: { url: string; isPrimary: boolean }[]
   variants: { price: number; salePrice: number | null }[]
 }
 
+
 export default function HomePage() {
   const { isMobile } = useBreakpoint()
   const { content } = useContentStore()
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const [featured, setFeatured] = useState<Product[]>([])
 
   useEffect(() => {
     axios.get('/products').then((res) => {
-      const allProducts: Product[] = res.data
+      const products: Product[] = res.data
+      setAllProducts(products)
 
       const featuredIds = content?.featured_product_ids
         ? content.featured_product_ids.split(',').filter(Boolean)
         : []
-
       if (featuredIds.length > 0) {
         const ordered = featuredIds
-          .map((id: string) => allProducts.find(p => p.id === id))
+          .map((id: string) => products.find(p => p.id === id))
           .filter(Boolean) as Product[]
-        setFeatured(ordered.length > 0 ? ordered : allProducts.filter(p => p.isFeatured))
+        setFeatured(ordered.length > 0 ? ordered : products.filter(p => p.isFeatured))
       } else {
-        setFeatured(allProducts.filter(p => p.isFeatured))
+        setFeatured(products.filter(p => p.isFeatured))
       }
     })
   }, [content])
 
+  const newArrivals = [...allProducts]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10)
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
 
-      {/* Hero */}
-      {/* Hero - Three Panel Layout */}
+      {/* Hero - Two Panel Layout */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: 0,
         minHeight: '100svh',
         background: '#0a0a0a',
       }}>
@@ -59,13 +69,11 @@ export default function HomePage() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: isMobile ? '60svh' : '100svh',
-          background: '#111',
+          minHeight: isMobile ? '70svh' : '100svh',
           overflow: 'hidden',
           textAlign: 'center',
           gap: '1.5rem',
         }}>
-          {/* Background image fills the panel */}
           <img
             src={flawsExtra}
             alt="FLAWS Extra"
@@ -77,18 +85,14 @@ export default function HomePage() {
               objectFit: 'cover',
             }}
           />
-
-          {/* Optional dark overlay so text stays legible over the photo */}
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.15))',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.15))',
           }} />
-
-          {/* Text overlay - centered */}
           <div style={{ position: 'relative', zIndex: 1 }}>
             <h2 style={{
-              fontSize: isMobile ? '2.5rem' : '3rem',
+              fontSize: isMobile ? '2.5rem' : '3.5rem',
               fontWeight: 900,
               textTransform: 'uppercase',
               color: '#ffffff',
@@ -102,8 +106,8 @@ export default function HomePage() {
               display: 'inline-block',
               background: '#ffffff',
               color: '#0a0a0a',
-              padding: '1rem 2rem',
-              fontSize: '0.65rem',
+              padding: '1rem 2.25rem',
+              fontSize: '0.7rem',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               fontWeight: 700,
@@ -114,143 +118,67 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Middle Panel - Brand Statement */}
+        {/* Right Panel - Main Collection Teaser */}
         <div style={{
+          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '3rem 2rem',
-          borderLeft: isMobile ? 'none' : '1px solid #1a1a1a',
-          borderRight: isMobile ? 'none' : '1px solid #1a1a1a',
-          borderTop: isMobile ? '1px solid #1a1a1a' : 'none',
           minHeight: isMobile ? '50svh' : '100svh',
+          overflow: 'hidden',
           textAlign: 'center',
-          gap: '2rem',
+          gap: '1.5rem',
+          borderLeft: isMobile ? 'none' : `1px solid ${RED}`,
+          borderTop: isMobile ? `1px solid ${RED}` : 'none',
         }}>
-          <p style={{
-            fontSize: isMobile ? '1.6rem' : '2.2rem',
-            fontWeight: 300,
-            letterSpacing: '0.05em',
-            color: '#ffffff',
-            lineHeight: 1.4,
-          }}>
-            Welcome to FLAWS.
-          </p>
-
-          {/* Script logo — replace with your actual image file */}
           <img
-            src={flawsLogo}
-            alt="FLAWS main collection"
+            src={mainCollectionImage}
+            alt="FLAWS Main Collection"
             style={{
-              width: isMobile ? '200px' : '320px',
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
             }}
           />
-
-          {/* Social Icons */}
           <div style={{
-            display: 'flex',
-            gap: '1.5rem',
-            alignItems: 'center',
-          }}>
-            {/* Instagram */}
-            <a
-              href="https://instagram.com/flawswrldwide"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#ffffff', opacity: 0.7, transition: 'opacity 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
-              </svg>
-            </a>
-
-            {/* X / Twitter */}
-            <a
-              href="https://x.com/@flawswrldwide"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#ffffff', opacity: 0.7, transition: 'opacity 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-            </a>
-
-            {/* TikTok */}
-            <a
-              href="https://tiktok.com/@flawswrldwide"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#ffffff', opacity: 0.7, transition: 'opacity 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0.7')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
-              </svg>
-            </a>
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.15))',
+          }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <img
+              src={flawsLogo}
+              alt="FLAWS main collection"
+              style={{ width: isMobile ? '160px' : '240px' }}
+            />
+            <p style={{
+              fontSize: '0.65rem',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color: RED,
+              marginBottom: '0.5rem',
+            }}>
+              main collection
+            </p>
+            <p style={{
+              fontSize: isMobile ? '1.3rem' : '1.6rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              letterSpacing: '0.05em',
+            }}>
+              Coming Soon!
+            </p>
           </div>
         </div>
 
-        {/* Right Panel - Collection Teaser */}
-        <div style={{
-          background: '#c4b49a',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: isMobile ? '50svh' : '100svh',
-          padding: '3rem 2rem',
-          textAlign: 'center',
-          gap: '1.5rem',
-          borderTop: isMobile ? '1px solid #1a1a1a' : 'none',
-        }}>
-          {/* Main collection script logo — replace with actual file */}
-          <img
-            src={flawsLogo}
-            alt="FLAWS main collection"
-            style={{
-              width: isMobile ? '140px' : '200px',
-            }}
-          />
-
-          <p style={{
-            fontSize: '0.6rem',
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: '#3a3028',
-          }}>
-            main collection
-          </p>
-
-          <p style={{
-            fontSize: isMobile ? '1.3rem' : '1.6rem',
-            fontWeight: 700,
-            color: '#ffffff',
-            letterSpacing: '0.05em',
-          }}>
-            Coming Soon!
-          </p>
-        </div>
-
       </div>
-
       {/* Featured Products */}
       {featured.length > 0 && (
         <section style={{ padding: isMobile ? '3rem 1rem' : '6rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            marginBottom: '3rem',
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
             <div>
               <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
                 Selected Pieces
@@ -276,37 +204,205 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Collections Banner */}
-      <section style={{ padding: isMobile ? '3rem 1rem' : '6rem 2rem', borderTop: '1px solid #1a1a1a' }}>
+      {/* New Arrivals Carousel */}
+      {newArrivals.length > 0 && (
+        <ProductCarousel
+          title="New Arrivals"
+          eyebrow="Just Landed"
+          products={newArrivals}
+          isMobile={isMobile}
+        />
+      )}
+      {/* Why Shop With Us */}
+      <section style={{ padding: isMobile ? '3rem 1.5rem' : '5rem 2rem', borderTop: '1px solid #1a1a1a' }}>
         <div style={{
-          maxWidth: '1400px',
+          maxWidth: '1200px',
           margin: '0 auto',
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gap: '1px',
-          background: '#1a1a1a',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+          gap: isMobile ? '2rem 1rem' : '2rem',
         }}>
-          <CollectionBanner title="Men's" subtitle="Essentials" href="/collections?gender=MEN" isMobile={isMobile} />
-          <CollectionBanner title="Women's" subtitle="Essentials" href="/collections?gender=WOMEN" isMobile={isMobile} />
+          {[
+            {
+              label: 'Free Shipping',
+              detail: 'On orders over R1000',
+              icon: (
+                <path d="M3 7h13l4 4v6h-2M3 7v10h2m10-10v10M9 17a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z" />
+              ),
+            },
+            {
+              label: 'Secure Checkout',
+              detail: 'Encrypted payment via PayFast',
+              icon: (
+                <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" />
+              ),
+            },
+            {
+              label: 'Tracked Delivery',
+              detail: 'Real-time courier tracking',
+              icon: (
+                <path d="M9 20l-5.5-3-.5-11L9 3l6 3.5v11L9 20zM3.5 6l5.5 3v11" />
+              ),
+            },
+            {
+              label: 'Easy Returns',
+              detail: 'Hassle-free return policy',
+              icon: (
+                <path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5" />
+              ),
+            },
+          ].map((item) => (
+            <div key={item.label} style={{ textAlign: 'center' }}>
+              <svg
+                width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke={RED} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ marginBottom: '1rem' }}
+              >
+                {item.icon}
+              </svg>
+              <p style={{ fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '0.35rem' }}>
+                {item.label}
+              </p>
+              <p style={{ fontSize: '0.7rem', color: '#888' }}>
+                {item.detail}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Brand Statement */}
-      <section style={{ padding: isMobile ? '4rem 1.5rem' : '8rem 2rem', borderTop: '1px solid #1a1a1a', textAlign: 'center' }}>
-        <p style={{
-          fontSize: isMobile ? '1.3rem' : 'clamp(1.5rem, 4vw, 3rem)',
-          fontWeight: 300,
-          letterSpacing: '0.05em',
-          color: '#ffffff',
-          maxWidth: '800px',
-          margin: '0 auto',
-          lineHeight: 1.5,
+      {/* Newsletter Signup */}
+      <section style={{ borderTop: '1px solid #1a1a1a' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: 0,
         }}>
-          Designed for those who find beauty in imperfection.
-        </p>
-        <div style={{ width: '40px', height: '1px', background: '#888', margin: '2rem auto 0' }} />
+
+          {/* Left — Image */}
+          <div style={{
+            position: 'relative',
+            minHeight: isMobile ? '40svh' : '560px',
+            overflow: 'hidden',
+          }}>
+            <img
+              src={newsletterImage}
+              alt="FLAWS"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.1))',
+            }} />
+          </div>
+
+          {/* Right — Form */}
+          <div style={{
+            background: '#0a0a0a',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            padding: isMobile ? '3rem 1.5rem' : '4rem 5rem',
+            borderLeft: isMobile ? 'none' : `1px solid ${RED}`,
+          }}>
+            <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.75rem' }}>
+              Stay Connected
+            </p>
+            <h2 style={{ fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '1rem' }}>
+              Get Early Access
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '2.5rem', lineHeight: 1.6, maxWidth: '380px' }}>
+              Be the first to know about new drops, restocks, and exclusive releases.
+            </p>
+
+            <NewsletterForm />
+          </div>
+
+        </div>
       </section>
     </div>
+  )
+}
+function ProductCarousel({ title, eyebrow, products, isMobile }: {
+  title: string
+  eyebrow: string
+  products: Product[]
+  isMobile: boolean
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const scroll = (dir: 'left' | 'right') => {
+    if (!scrollRef.current) return
+    const amount = isMobile ? 220 : 340
+    scrollRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' })
+  }
+
+  return (
+    <section style={{ padding: isMobile ? '3rem 0' : '6rem 0', borderTop: '1px solid #1a1a1a' }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginBottom: '2rem',
+        padding: isMobile ? '0 1rem' : '0 2rem',
+        maxWidth: '1400px',
+        margin: '0 auto',
+      }}>
+        <div>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
+            {eyebrow}
+          </p>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
+            {title}
+          </h2>
+        </div>
+        {!isMobile && (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => scroll('left')} aria-label="Scroll left" style={arrowButtonStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button onClick={() => scroll('right')} aria-label="Scroll right" style={arrowButtonStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div
+        ref={scrollRef}
+        style={{
+          display: 'flex',
+          gap: '1px',
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory',
+          padding: isMobile ? '0 1rem' : '0 2rem',
+          scrollbarWidth: 'none',
+        }}
+      >
+        {products.map((product) => (
+          <div
+            key={product.id}
+            style={{
+              flex: `0 0 ${isMobile ? '200px' : '320px'}`,
+              scrollSnapAlign: 'start',
+            }}
+          >
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -342,35 +438,104 @@ function ProductCard({ product }: { product: Product }) {
   )
 }
 
-function CollectionBanner({ title, subtitle, href, isMobile }: { title: string; subtitle: string; href: string; isMobile: boolean }) {
-  const [hovered, setHovered] = useState(false)
+const arrowButtonStyle: React.CSSProperties = {
+  background: 'none',
+  border: '1px solid #333',
+  color: '#fff',
+  width: '36px',
+  height: '36px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+}
+
+function NewsletterForm() {
+  const [form, setForm] = useState({ name: '', email: '', city: '' })
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name || !form.email || !form.city) {
+      setError('All fields are required')
+      return
+    }
+    setStatus('loading')
+    setError('')
+    try {
+      await axios.post('/waitlist', form)
+      setStatus('success')
+    } catch (err: any) {
+      setStatus('error')
+      setError(err.response?.data?.message || 'Something went wrong')
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <p style={{ fontSize: '0.85rem', color: '#ffffff' }}>
+        You're on the list — thanks for joining.
+      </p>
+    )
+  }
 
   return (
-    <Link to={href} style={{ textDecoration: 'none' }}>
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <input
+        type="text"
+        placeholder="Full Name"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+        style={inputStyle}
+      />
+      <input
+        type="email"
+        placeholder="Email Address"
+        value={form.email}
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
+        style={inputStyle}
+      />
+      <input
+        type="text"
+        placeholder="City"
+        value={form.city}
+        onChange={(e) => setForm({ ...form, city: e.target.value })}
+        style={inputStyle}
+      />
+      {error && (
+        <p style={{ fontSize: '0.7rem', color: '#ff6b6b' }}>{error}</p>
+      )}
+      <button
+        type="submit"
+        disabled={status === 'loading'}
         style={{
-          background: hovered ? '#111' : '#0a0a0a',
-          padding: isMobile ? '3rem 1.5rem' : '6rem 3rem',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          minHeight: isMobile ? '220px' : '400px',
-          transition: 'background 0.3s ease',
-          cursor: 'pointer',
+          padding: '1rem',
+          background: RED,
+          color: '#ffffff',
+          border: 'none',
+          fontSize: '0.7rem',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+          opacity: status === 'loading' ? 0.7 : 1,
+          marginTop: '0.5rem',
         }}
       >
-        <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
-          {subtitle}
-        </p>
-        <h3 style={{ fontSize: isMobile ? '2rem' : '2.5rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ffffff' }}>
-          {title}
-        </h3>
-        <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginTop: '1.5rem' }}>
-          Shop Now →
-        </p>
-      </div>
-    </Link>
+        {status === 'loading' ? 'Joining...' : 'Join Now'}
+      </button>
+    </form>
   )
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.9rem 1rem',
+  background: '#111',
+  border: '1px solid #1a1a1a',
+  color: '#ffffff',
+  fontSize: '0.85rem',
+  outline: 'none',
+  boxSizing: 'border-box',
 }
