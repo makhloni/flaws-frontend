@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getCollectionBySlug } from '../api/collections.api'
+import { getCollectionBySlug, getCollections } from '../api/collections.api'
+
+const RED = '#C1272D'
 
 interface Product {
   id: string
@@ -25,13 +27,18 @@ interface Collection {
 export default function CollectionDetailPage() {
   const { slug } = useParams()
   const [collection, setCollection] = useState<Collection | null>(null)
+  const [otherCollections, setOtherCollections] = useState<Collection[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!slug) return
+    setLoading(true)
     getCollectionBySlug(slug).then((data) => {
       setCollection(data)
       setLoading(false)
+    })
+    getCollections().then((all: Collection[]) => {
+      setOtherCollections(all.filter((c: Collection) => c.slug !== slug))
     })
   }, [slug])
 
@@ -47,40 +54,98 @@ export default function CollectionDetailPage() {
     </div>
   )
 
+  // Pull up to 3 product images for the hero collage — falls back to
+  // collection.imageUrl, then nothing, so this never crashes on a
+  // brand-new collection with few/no products yet.
+  const collageImages = collection.products
+    .map(p => p.images.find(i => i.isPrimary)?.url || p.images[0]?.url)
+    .filter(Boolean)
+    .slice(0, 3)
+  if (collageImages.length === 0 && collection.imageUrl) {
+    collageImages.push(collection.imageUrl)
+  }
+
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
 
-      {/* Header */}
+      {/* Hero Collage */}
+      {collageImages.length > 0 && (
+        <div style={{
+          position: 'relative',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${collageImages.length}, 1fr)`,
+          height: '380px',
+          overflow: 'hidden',
+        }}>
+          {collageImages.map((url, i) => (
+            <div key={i} style={{ position: 'relative', overflow: 'hidden' }}>
+              <img
+                src={url}
+                alt=""
+                style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.55)' }}
+              />
+            </div>
+          ))}
+          <h1 style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 'clamp(2.5rem, 8vw, 6rem)',
+            fontWeight: 900,
+            letterSpacing: '0.02em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+            textAlign: 'center',
+            padding: '0 1rem',
+          }}>
+            {collection.name}
+          </h1>
+        </div>
+      )}
+
+      {/* Breadcrumb + count */}
       <div style={{
         borderBottom: '1px solid #1a1a1a',
-        padding: '4rem 2rem 2rem',
+        padding: '1.5rem 2rem',
         maxWidth: '1400px',
         margin: '0 auto',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-end',
+        alignItems: 'center',
       }}>
-        <div>
-          <Link
-            to="/collections"
-            style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', textDecoration: 'none', display: 'block', marginBottom: '0.75rem' }}
-          >
-            ← Collections
-          </Link>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
-            {collection.gender}
-          </p>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            {collection.name}
-          </h1>
-          {collection.description && (
-            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.75rem', maxWidth: '480px', lineHeight: 1.7 }}>
-              {collection.description}
-            </p>
-          )}
-        </div>
+        <Link
+          to="/collections"
+          style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', textDecoration: 'none' }}
+        >
+          ← Collections
+        </Link>
         <p style={{ fontSize: '0.75rem', color: '#888' }}>{collection.products.length} pieces</p>
       </div>
+
+      {/* Backstory */}
+      {collection.description && (
+        <div style={{
+          maxWidth: '700px',
+          margin: '0 auto',
+          padding: '4rem 2rem',
+          textAlign: 'center',
+        }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '1.5rem' }}>
+            {collection.gender}
+          </p>
+          <p style={{
+            fontSize: '1.1rem',
+            fontWeight: 300,
+            color: '#ffffff',
+            lineHeight: 1.8,
+          }}>
+            {collection.description}
+          </p>
+          <div style={{ width: '40px', height: '1px', background: RED, margin: '2rem auto 0' }} />
+        </div>
+      )}
 
       {/* Products Grid */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
@@ -90,7 +155,7 @@ export default function CollectionDetailPage() {
               No products in this collection yet
             </p>
             <Link
-              to="/products"
+              to="/collections"
               style={{
                 padding: '1rem 3rem',
                 border: '1px solid #ffffff',
@@ -101,7 +166,7 @@ export default function CollectionDetailPage() {
                 textTransform: 'uppercase',
               }}
             >
-              Shop All
+              View Other Collections
             </Link>
           </div>
         ) : (
@@ -117,6 +182,38 @@ export default function CollectionDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Cross-link to other collections */}
+      {otherCollections.length > 0 && (
+        <div style={{
+          borderTop: '1px solid #1a1a1a',
+          padding: '3rem 2rem',
+          textAlign: 'center',
+        }}>
+          <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '1.25rem' }}>
+            Looking for something else?
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {otherCollections.map((c) => (
+              <Link
+                key={c.slug}
+                to={`/collections/${c.slug}`}
+                style={{
+                  padding: '0.85rem 2rem',
+                  border: '1px solid #333',
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  fontSize: '0.65rem',
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {c.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
