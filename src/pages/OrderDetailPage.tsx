@@ -285,45 +285,50 @@ export default function OrderDetailPage() {
   )
 }
 
-/**
- * Renders whatever tracking status fields are present, defensively.
- * The exact response shape from Courier Guy's tracking endpoint hasn't
- * been confirmed against a real sandbox call yet — once it has, this
- * can be replaced with a proper field-by-field layout (timeline of
- * events, current location, ETA, etc.) instead of a generic dump.
- */
-function TrackingStatus({ status }: { status: any }) {
-  // Common-sense guesses at likely field names — shown only if present.
-  const currentStatus = status.status || status.current_status || status.tracking_status
-  const events = status.tracking_events || status.events || status.history
 
-  if (!currentStatus && !events) {
-    // Unknown shape — show raw JSON rather than nothing, so it's at
-    // least useful for debugging until the real shape is confirmed.
-    return (
-      <pre style={{ fontSize: '0.65rem', color: '#888', whiteSpace: 'pre-wrap', overflow: 'auto' }}>
-        {JSON.stringify(status, null, 2)}
-      </pre>
-    )
+function TrackingStatus({ status }: { status: any }) {
+  const currentStatus = status.status
+  const events = status.tracking_events || []
+  const shipmentEvents = events.filter((e: any) => e.parcel_id === 0)
+
+  const statusLabels: Record<string, string> = {
+    submitted: 'Submitted',
+    'awaiting-dropoff': 'Awaiting Drop-off',
+    'collection-exception': 'Collection Issue',
+    'collection-failed-attempt': 'Collection Attempt Failed',
+    collected: 'Collected',
+    'at-hub': 'At Hub',
+    'in-transit': 'In Transit',
+    'at-destination-hub': 'At Destination Hub',
+    'out-for-delivery': 'Out for Delivery',
+    'delivery-exception': 'Delivery Issue',
+    'delivery-failed-attempt': 'Delivery Attempt Failed',
+    'in-locker': 'In Locker',
+    'ready-for-pickup': 'Ready for Pickup',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
   }
 
   return (
     <div>
       {currentStatus && (
         <p style={{ fontSize: '0.75rem', color: '#fff', marginBottom: '1rem' }}>
-          Current status: <span style={{ color: '#9C27B0' }}>{currentStatus}</span>
+          Current status:{' '}
+          <span style={{ color: '#9C27B0' }}>
+            {statusLabels[currentStatus] || currentStatus}
+          </span>
         </p>
       )}
-      {Array.isArray(events) && events.length > 0 && (
+      {shipmentEvents.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {events.map((event: any, i: number) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+          {shipmentEvents.map((event: any) => (
+            <div key={event.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
               <p style={{ fontSize: '0.7rem', color: '#ccc' }}>
-                {event.description || event.status || event.message}
+                {statusLabels[event.status] || event.message || event.status}
               </p>
               <p style={{ fontSize: '0.65rem', color: '#555', whiteSpace: 'nowrap' }}>
-                {event.timestamp || event.date
-                  ? new Date(event.timestamp || event.date).toLocaleDateString('en-ZA')
+                {event.created_at
+                  ? new Date(event.created_at).toLocaleDateString('en-ZA')
                   : ''}
               </p>
             </div>
