@@ -111,7 +111,6 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          </div>
         )}
 
       {/* Right — icon-only actions */}
