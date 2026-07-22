@@ -210,8 +210,8 @@ export default function CheckoutPage() {
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {[
-                    { key: 'fullName', label: 'Full Name', placeholder: 'John Doe' },
-                    { key: 'street', label: 'Street Address', placeholder: '123 Main Street' },
+                    { key: 'fullName', label: 'Full Name', placeholder: 'Your name' },
+                    { key: 'street', label: 'Street Address', placeholder: 'Street' },
                     { key: 'city', label: 'City', placeholder: 'Johannesburg' },
                     { key: 'province', label: 'Province', placeholder: 'Gauteng' },
                     { key: 'postalCode', label: 'Postal Code', placeholder: '2000' },
