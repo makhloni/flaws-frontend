@@ -287,12 +287,14 @@ export default function OrderDetailPage() {
 
 
 function TrackingStatus({ status }: { status: any }) {
-  const currentStatus = status.status
-  const events = status.tracking_events || []
-  const shipmentEvents = events.filter((e: any) => e.parcel_id === 0)
+  const shipment = status.shipments?.[0]
+  const steps = status.tracking_steps || []
+
+  if (!shipment) return null
 
   const statusLabels: Record<string, string> = {
     submitted: 'Submitted',
+    'collection-assigned': 'Collection Assigned',
     'awaiting-dropoff': 'Awaiting Drop-off',
     'collection-exception': 'Collection Issue',
     'collection-failed-attempt': 'Collection Attempt Failed',
@@ -307,28 +309,72 @@ function TrackingStatus({ status }: { status: any }) {
     'ready-for-pickup': 'Ready for Pickup',
     delivered: 'Delivered',
     cancelled: 'Cancelled',
+    created: 'Order Created',
   }
+
+  const shipmentEvents = (shipment.tracking_events || []).filter((e: any) => e.parcel_id === 0)
 
   return (
     <div>
-      {currentStatus && (
-        <p style={{ fontSize: '0.75rem', color: '#fff', marginBottom: '1rem' }}>
-          Current status:{' '}
-          <span style={{ color: '#9C27B0' }}>
-            {statusLabels[currentStatus] || currentStatus}
-          </span>
+      {/* Progress steps */}
+      {steps.length > 0 && (
+        <div style={{ display: 'flex', marginBottom: '2rem', gap: '0.25rem' }}>
+          {steps.map((step: any) => (
+            <div key={step.step_number} style={{ flex: 1 }}>
+              <div style={{
+                height: '3px',
+                background: step.progress === 'pending' ? '#1a1a1a' : '#9C27B0',
+                marginBottom: '0.5rem',
+              }} />
+              <p style={{
+                fontSize: '0.6rem',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: step.progress === 'current' ? '#fff' : step.progress === 'pending' ? '#555' : '#9C27B0',
+              }}>
+                {statusLabels[step.label] || step.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Current status + ETA */}
+      <p style={{ fontSize: '0.75rem', color: '#fff', marginBottom: '0.5rem' }}>
+        Current status:{' '}
+        <span style={{ color: '#9C27B0' }}>
+          {statusLabels[shipment.status] || shipment.status}
+        </span>
+      </p>
+      {shipment.shipment_estimated_delivery_from && (
+        <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '1.5rem' }}>
+          Estimated delivery:{' '}
+          {new Date(shipment.shipment_estimated_delivery_from).toLocaleDateString('en-ZA', {
+            weekday: 'long', day: 'numeric', month: 'long',
+          })}
+          {' '}between{' '}
+          {new Date(shipment.shipment_estimated_delivery_from).toLocaleTimeString('en-ZA', {
+            hour: '2-digit', minute: '2-digit',
+          })}
+          {' '}and{' '}
+          {new Date(shipment.shipment_estimated_delivery_to).toLocaleTimeString('en-ZA', {
+            hour: '2-digit', minute: '2-digit',
+          })}
         </p>
       )}
+
+      {/* Event history */}
       {shipmentEvents.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {shipmentEvents.map((event: any) => (
             <div key={event.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
               <p style={{ fontSize: '0.7rem', color: '#ccc' }}>
-                {statusLabels[event.status] || event.message || event.status}
+                {statusLabels[event.status] || event.status}
+                {event.location ? ` — ${event.location}` : ''}
               </p>
               <p style={{ fontSize: '0.65rem', color: '#555', whiteSpace: 'nowrap' }}>
-                {event.created_at
-                  ? new Date(event.created_at).toLocaleDateString('en-ZA')
+                {event.date
+                  ? new Date(event.date).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
                   : ''}
               </p>
             </div>
