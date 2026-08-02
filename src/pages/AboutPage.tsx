@@ -106,7 +106,7 @@ export default function AboutPage() {
             </p>
           </Link>
 
-          <Link to="/collections/main-collection" style={{ textDecoration: 'none', marginTop: isMobile ? 0 : '3rem' }}>
+          <Link to="/collections/main-collection" style={{ textDecoration: 'none'}}>
             <div style={{ position: 'relative', aspectRatio: '3/4', overflow: 'hidden' }}>
               <img
                 src={mainCollectionPreview}
@@ -153,21 +153,6 @@ export default function AboutPage() {
             playsInline
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-          <p style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            fontFamily: "Georgia, serif",
-            fontStyle: 'italic',
-            fontWeight: 700,
-            fontSize: isMobile ? '3rem' : '6rem',
-            color: '#F2B400',
-            textAlign: 'center',
-            lineHeight: 1,
-          }}>
-            shopping
-          </p>
         </div>
       </div>
 
