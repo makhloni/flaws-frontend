@@ -16,6 +16,7 @@ import CheckoutPage from './pages/CheckoutPage'
 import OrderDetailPage from './pages/OrderDetailPage'
 import OrdersPage from './pages/OrdersPage'
 import AccountPage from './pages/AccountPage'
+import MainCollectionPage from './pages/MainCollectionPage'
 import CollectionDetailPage from './pages/CollectionDetailPage'
 import ReturnsPolicyPage from './pages/ReturnsPolicyPage'
 import ContactPage from './pages/ContactPage'
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/collections/main-collection" element={<MainCollectionPage />} />
           <Route path="/collections/:slug" element={<CollectionDetailPage />} />
           <Route path="/returns" element={<ReturnsPolicyPage />} />
           <Route path="/contact" element={<ContactPage />} />

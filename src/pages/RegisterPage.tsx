@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom'
 import { register } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
 import { login } from '../api/auth.api'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import flawsLogo from '../assets/flaws-logo.png'
 
 const RED = '#C1272D'
 
 export default function RegisterPage() {
   const { mergeAndLogin } = useAuthStore()
+  const { isMobile } = useBreakpoint()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -42,18 +45,12 @@ export default function RegisterPage() {
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
 
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <p style={{
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: '#ffffff',
-            textAlign: 'center',
-            marginBottom: '3rem',
-          }}>
-            FLAWS
-          </p>
+        <Link to="/" style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
+          <img
+            src={flawsLogo}
+            alt="FLAWS"
+            style={{ width: isMobile ? '120px' : '160px', height: 'auto' }}
+          />
         </Link>
 
         <p style={{

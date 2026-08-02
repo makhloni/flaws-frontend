@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { login } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import flawsLogo from '../assets/flaws-logo.png'
 
 const RED = '#C1272D'
 
 export default function LoginPage() {
   const { mergeAndLogin } = useAuthStore()
+  const { isMobile } = useBreakpoint()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,18 +41,12 @@ export default function LoginPage() {
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
 
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <p style={{
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: '#ffffff',
-            textAlign: 'center',
-            marginBottom: '3rem',
-          }}>
-            FLAWS
-          </p>
+        <Link to="/" style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
+          <img
+            src={flawsLogo}
+            alt="FLAWS"
+            style={{ width: isMobile ? '120px' : '160px', height: 'auto' }}
+          />
         </Link>
 
         <p style={{
