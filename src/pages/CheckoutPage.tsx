@@ -6,6 +6,9 @@ import { getAddresses, addAddress } from '../api/address.api'
 import { initializePayment } from '../api/payment.api'
 import { getShippingRates } from '../api/shipping.api'
 
+const RED = '#C1272D'
+
+
 interface Address {
   id: string
   fullName: string
@@ -142,7 +145,7 @@ export default function CheckoutPage() {
 
         {/* Header */}
         <div style={{ marginBottom: '3rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
             Final Step
           </p>
           <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -171,10 +174,11 @@ export default function CheckoutPage() {
                     onClick={() => setSelectedAddress(address.id)}
                     style={{
                       padding: '1.5rem',
-                      border: selectedAddress === address.id ? '1px solid #ffffff' : '1px solid #1a1a1a',
+                      border: selectedAddress === address.id ? `1px solid ${RED}` : '1px solid #1a1a1a',
                       cursor: 'pointer',
                       transition: 'border 0.2s',
                     }}
+
                   >
                     <p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem' }}>{address.fullName}</p>
                     <p style={{ fontSize: '0.75rem', color: '#888', lineHeight: 1.6 }}>
@@ -291,7 +295,7 @@ export default function CheckoutPage() {
                         onClick={() => setSelectedService(rate.serviceLevelCode)}
                         style={{
                           padding: '1.25rem 1.5rem',
-                          border: selectedService === rate.serviceLevelCode ? '1px solid #ffffff' : '1px solid #1a1a1a',
+                          border: selectedService === rate.serviceLevelCode ? `1px solid ${RED}` : '1px solid #1a1a1a',
                           cursor: 'pointer',
                           transition: 'border 0.2s',
                           display: 'flex',

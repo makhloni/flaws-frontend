@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getOrders } from '../api/orders.api'
 
+const RED = '#C1272D'
+
 interface Order {
   id: string
   status: string
@@ -48,7 +50,7 @@ export default function OrdersPage() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '4rem 2rem' }}>
 
         <div style={{ marginBottom: '3rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
             Your History
           </p>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -62,7 +64,7 @@ export default function OrdersPage() {
               No orders yet
             </p>
             <Link
-              to="/products"
+              to="/"
               style={{
                 padding: '1rem 3rem',
                 border: '1px solid #ffffff',

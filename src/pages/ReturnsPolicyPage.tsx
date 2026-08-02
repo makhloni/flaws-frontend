@@ -1,5 +1,7 @@
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
+const RED = '#C1272D'
+
 export default function ReturnsPolicyPage() {
   const { isMobile } = useBreakpoint()
 
@@ -7,9 +9,8 @@ export default function ReturnsPolicyPage() {
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: isMobile ? '3rem 1.5rem' : '6rem 2rem' }}>
 
-        {/* Header */}
         <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem', marginBottom: '3rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.75rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.75rem' }}>
             Legal
           </p>
           <h1 style={{ fontSize: isMobile ? '1.75rem' : '2.5rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -20,7 +21,6 @@ export default function ReturnsPolicyPage() {
           </p>
         </div>
 
-        {/* Content */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
 
           <Section title="Our Policy">
@@ -78,16 +78,16 @@ export default function ReturnsPolicyPage() {
           </Section>
 
           <Section title="Defective or Incorrect Items">
-            If you received a defective, damaged, or incorrect item, please contact us within <strong style={{ color: '#fff' }}>48 hours</strong> of delivery at <a href="mailto:support@flaws.co.za" style={{ color: '#fff', textDecoration: 'underline' }}>support@flaws.co.za</a>. Include photos of the item and your order number. We will cover all shipping costs for defective or incorrect items.
+            If you received a defective, damaged, or incorrect item, please contact us within <strong style={{ color: '#fff' }}>48 hours</strong> of delivery at <a href="mailto:support@flaws.co.za" style={{ color: RED, textDecoration: 'underline' }}>support@flaws.co.za</a>. Include photos of the item and your order number. We will cover all shipping costs for defective or incorrect items.
           </Section>
 
           <Section title="Contact">
             For any questions about our returns policy, reach out to us at{' '}
-            <a href="mailto:returns@flaws.co.za" style={{ color: '#fff', textDecoration: 'underline' }}>
+            <a href="mailto:returns@flaws.co.za" style={{ color: RED, textDecoration: 'underline' }}>
               returns@flaws.co.za
             </a>{' '}
             or visit our{' '}
-            <a href="/contact" style={{ color: '#fff', textDecoration: 'underline' }}>
+            <a href="/contact" style={{ color: RED, textDecoration: 'underline' }}>
               contact page
             </a>.
           </Section>

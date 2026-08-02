@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { getProducts } from '../api/products.api'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
+const RED = '#C1272D'
+
 interface Product {
   id: string
   name: string
@@ -37,7 +39,6 @@ export default function ProductsPage() {
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
 
-      {/* Header */}
       <div style={{
         borderBottom: '1px solid #1a1a1a',
         padding: '4rem 2rem 2rem',
@@ -48,7 +49,7 @@ export default function ProductsPage() {
         alignItems: 'flex-end',
       }}>
         <div>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
             The Store
           </p>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -58,7 +59,6 @@ export default function ProductsPage() {
         <p style={{ fontSize: '0.75rem', color: '#888' }}>{filtered.length} pieces</p>
       </div>
 
-      {/* Filters */}
       <div style={{
         borderBottom: '1px solid #1a1a1a',
         padding: '1rem 2rem',
@@ -78,8 +78,8 @@ export default function ProductsPage() {
               fontSize: '0.65rem',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              color: activeGender === g ? '#ffffff' : '#888',
-              borderBottom: activeGender === g ? '1px solid #ffffff' : '1px solid transparent',
+              color: activeGender === g ? RED : '#888',
+              borderBottom: activeGender === g ? `1px solid ${RED}` : '1px solid transparent',
               paddingBottom: '4px',
               transition: 'all 0.2s',
             }}
@@ -89,7 +89,6 @@ export default function ProductsPage() {
         ))}
       </div>
 
-      {/* Grid */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '6rem', color: '#888', fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
@@ -125,7 +124,6 @@ function ProductCard({ product }: { product: Product }) {
         onMouseLeave={() => setHovered(false)}
         style={{ background: '#0a0a0a', cursor: 'pointer', overflow: 'hidden' }}
       >
-        {/* Image */}
         <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: '#111', position: 'relative' }}>
           {primaryImage ? (
             <img
@@ -156,7 +154,6 @@ function ProductCard({ product }: { product: Product }) {
             </div>
           )}
 
-          {/* Sizes on hover */}
           {hovered && sizes.length > 0 && (
             <div style={{
               position: 'absolute',
@@ -198,7 +195,6 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Info */}
         <div style={{ padding: '1rem', background: '#0a0a0a' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>

@@ -4,6 +4,8 @@ import { register } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
 import { login } from '../api/auth.api'
 
+const RED = '#C1272D'
+
 export default function RegisterPage() {
   const { mergeAndLogin } = useAuthStore()
   const [name, setName] = useState('')
@@ -58,7 +60,7 @@ export default function RegisterPage() {
           fontSize: '0.65rem',
           letterSpacing: '0.25em',
           textTransform: 'uppercase',
-          color: '#888',
+          color: RED,
           textAlign: 'center',
           marginBottom: '2.5rem',
         }}>
@@ -134,7 +136,7 @@ export default function RegisterPage() {
 
         <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#888' }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: '#ffffff', textDecoration: 'none', borderBottom: '1px solid #444' }}>
+          <Link to="/login" style={{ color: RED, textDecoration: 'none', borderBottom: `1px solid ${RED}` }}>
             Sign in
           </Link>
         </p>

@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 import { getAddresses, addAddress } from '../api/address.api'
 
+const RED = '#C1272D'
+
 interface Address {
   id: string
   fullName: string
@@ -70,7 +72,7 @@ export default function AccountPage() {
         {/* Header */}
         <div style={{ marginBottom: '3rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+            <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
               My Account
             </p>
             <h1 style={{ fontSize: '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -107,8 +109,8 @@ export default function AccountPage() {
                 fontSize: '0.65rem',
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
-                color: activeTab === tab ? '#ffffff' : '#888',
-                borderBottom: activeTab === tab ? '1px solid #ffffff' : '1px solid transparent',
+                color: activeTab === tab ? RED : '#888',
+                borderBottom: activeTab === tab ? `1px solid ${RED}` : '1px solid transparent',
                 paddingBottom: '1rem',
                 marginBottom: '-1px',
                 transition: 'all 0.2s',
@@ -188,8 +190,8 @@ export default function AccountPage() {
                         fontSize: '0.55rem',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: '#fff',
-                        border: '1px solid #333',
+                        color: RED,
+                        border: `1px solid ${RED}`,
                         padding: '3px 8px',
                       }}>
                         Default

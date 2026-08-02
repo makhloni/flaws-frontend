@@ -6,6 +6,8 @@ import api from '../api/axios'
 import { useGuestCartStore } from '../store/useGuestCartStore'
 import SizeGuideModal from '../components/SizeGuideModal'
 
+const RED = '#C1272D'
+
 interface Variant {
   id: string
   size: string
@@ -15,7 +17,6 @@ interface Variant {
   salePrice: number | null
   stock: number
 }
-
 
 interface Product {
   id: string
@@ -53,19 +54,19 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState<RelatedProduct[]>([])
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
 
-useEffect(() => {
-  if (!slug) return
-  setLoading(true)
-  setRelated([])
+  useEffect(() => {
+    if (!slug) return
+    setLoading(true)
+    setRelated([])
 
-  getProductBySlug(slug).then((data) => {
-    setProduct(data)
-    setSelectedVariant(data.variants[0] || null)
-    setLoading(false)
-  })
+    getProductBySlug(slug).then((data) => {
+      setProduct(data)
+      setSelectedVariant(data.variants[0] || null)
+      setLoading(false)
+    })
 
-  getRelatedProducts(slug).then(setRelated)
-}, [slug])
+    getRelatedProducts(slug).then(setRelated)
+  }, [slug])
 
   const sortedImages = product?.images.sort((a, b) => a.position - b.position) || []
   const colors = [...new Map(product?.variants.map((v) => [v.color, v]) || []).values()]
@@ -143,7 +144,6 @@ useEffect(() => {
 
         {/* Images */}
         {isMobile ? (
-          // Mobile: main image top, thumbnails below as horizontal strip
           <div style={{ width: '100%' }}>
             <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: '#111', marginBottom: '0.75rem' }}>
               {sortedImages[selectedImage] ? (
@@ -170,7 +170,7 @@ useEffect(() => {
                       aspectRatio: '1',
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      border: selectedImage === i ? '1px solid #ffffff' : '1px solid #1a1a1a',
+                      border: selectedImage === i ? `1px solid ${RED}` : '1px solid #1a1a1a',
                       transition: 'border 0.2s',
                     }}
                   >
@@ -181,7 +181,6 @@ useEffect(() => {
             )}
           </div>
         ) : (
-          // Desktop: thumbnails left, main image right
           <div style={{ flex: '1.2', display: 'grid', gridTemplateColumns: '80px 1fr', gap: '1rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {sortedImages.map((img, i) => (
@@ -192,7 +191,7 @@ useEffect(() => {
                     aspectRatio: '1',
                     overflow: 'hidden',
                     cursor: 'pointer',
-                    border: selectedImage === i ? '1px solid #ffffff' : '1px solid #1a1a1a',
+                    border: selectedImage === i ? `1px solid ${RED}` : '1px solid #1a1a1a',
                     transition: 'border 0.2s',
                   }}
                 >
@@ -219,17 +218,14 @@ useEffect(() => {
         {/* Product Info */}
         <div style={{ flex: 1, paddingTop: isMobile ? 0 : '2rem', minWidth: 0 }}>
 
-          {/* Breadcrumb */}
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: RED, marginBottom: '1.5rem' }}>
             {product.collection?.name} / {product.gender}
           </p>
 
-          {/* Name */}
           <h1 style={{ fontSize: isMobile ? '1.4rem' : '1.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>
             {product.name}
           </h1>
 
-          {/* Price */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
             <p style={{ fontSize: '1.1rem', fontWeight: 500, color: '#ffffff' }}>
               R{price ? Number(price).toFixed(2) : '—'}
@@ -241,7 +237,6 @@ useEffect(() => {
             )}
           </div>
 
-          {/* Color */}
           {colors.length > 0 && (
             <div style={{ marginBottom: '2rem' }}>
               <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '1rem' }}>
@@ -260,7 +255,7 @@ useEffect(() => {
                       height: '28px',
                       borderRadius: '50%',
                       background: variant.colorHex || '#888',
-                      border: selectedColor === variant.color ? '2px solid #ffffff' : '2px solid transparent',
+                      border: selectedColor === variant.color ? `2px solid ${RED}` : '2px solid transparent',
                       outline: selectedColor === variant.color ? '1px solid #888' : 'none',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -272,7 +267,6 @@ useEffect(() => {
             </div>
           )}
 
-          {/* Size */}
           <div style={{ marginBottom: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888' }}>
@@ -304,7 +298,7 @@ useEffect(() => {
                   style={{
                     padding: '10px 16px',
                     background: 'none',
-                    border: selectedVariant?.id === variant.id ? '1px solid #ffffff' : '1px solid #333',
+                    border: selectedVariant?.id === variant.id ? `1px solid ${RED}` : '1px solid #333',
                     color: variant.stock === 0 ? '#444' : selectedVariant?.id === variant.id ? '#ffffff' : '#888',
                     fontSize: '0.65rem',
                     letterSpacing: '0.1em',
@@ -320,7 +314,6 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Quantity */}
           <div style={{ marginBottom: '2rem' }}>
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '1rem' }}>
               Quantity
@@ -342,19 +335,16 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Stock */}
           {selectedVariant && (
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.1em', color: selectedVariant.stock < 5 ? '#ff6b6b' : '#888', marginBottom: '1.5rem' }}>
               {selectedVariant.stock === 0 ? 'Out of stock' : selectedVariant.stock < 5 ? `Only ${selectedVariant.stock} left` : 'In stock'}
             </p>
           )}
 
-          {/* Error */}
           {error && (
             <p style={{ fontSize: '0.7rem', color: '#ff6b6b', marginBottom: '1rem', letterSpacing: '0.05em' }}>{error}</p>
           )}
 
-          {/* Add to Cart */}
           <button
             onClick={handleAddToCart}
             disabled={adding || selectedVariant?.stock === 0}
@@ -376,7 +366,6 @@ useEffect(() => {
             {adding ? 'Adding...' : added ? 'Added to Cart ✓' : 'Add to Cart'}
           </button>
 
-          {/* Description */}
           <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #1a1a1a' }}>
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '1rem' }}>
               Details
@@ -392,7 +381,6 @@ useEffect(() => {
         onClose={() => setSizeGuideOpen(false)}
         gender={product.gender}
       />
-      {/* Related Products */}
       {related.length > 0 && (
         <div style={{
           borderTop: '1px solid #1a1a1a',
@@ -404,7 +392,7 @@ useEffect(() => {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
             <div>
-              <p style={{ fontSize: '0.6rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+              <p style={{ fontSize: '0.6rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
                 You May Also Like
               </p>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -412,7 +400,7 @@ useEffect(() => {
               </h2>
             </div>
             <Link
-              to="/products"
+              to="/"
               style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', textDecoration: 'none', borderBottom: '1px solid #555', paddingBottom: '2px' }}
             >
               View All

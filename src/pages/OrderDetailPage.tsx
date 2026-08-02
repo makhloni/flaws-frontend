@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getOrderById, getOrderTracking } from '../api/orders.api'
 
+const RED = '#C1272D'
+
 interface OrderItem {
   id: string
   quantity: number
@@ -100,7 +102,7 @@ export default function OrderDetailPage() {
         <div style={{ marginBottom: '3rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+              <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
                 Order Confirmed
               </p>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
@@ -265,7 +267,7 @@ export default function OrderDetailPage() {
             All Orders
           </Link>
           <Link
-            to="/products"
+            to="/"
             style={{
               padding: '1rem 2rem',
               background: '#ffffff',
@@ -284,7 +286,6 @@ export default function OrderDetailPage() {
     </div>
   )
 }
-
 
 function TrackingStatus({ status }: { status: any }) {
   const shipment = status.shipments?.[0]
@@ -323,14 +324,14 @@ function TrackingStatus({ status }: { status: any }) {
             <div key={step.step_number} style={{ flex: 1 }}>
               <div style={{
                 height: '3px',
-                background: step.progress === 'pending' ? '#1a1a1a' : '#9C27B0',
+                background: step.progress === 'pending' ? '#1a1a1a' : RED,
                 marginBottom: '0.5rem',
               }} />
               <p style={{
                 fontSize: '0.6rem',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
-                color: step.progress === 'current' ? '#fff' : step.progress === 'pending' ? '#555' : '#9C27B0',
+                color: step.progress === 'current' ? '#fff' : step.progress === 'pending' ? '#555' : RED,
               }}>
                 {statusLabels[step.label] || step.label}
               </p>
@@ -342,7 +343,7 @@ function TrackingStatus({ status }: { status: any }) {
       {/* Current status + ETA */}
       <p style={{ fontSize: '0.75rem', color: '#fff', marginBottom: '0.5rem' }}>
         Current status:{' '}
-        <span style={{ color: '#9C27B0' }}>
+        <span style={{ color: RED }}>
           {statusLabels[shipment.status] || shipment.status}
         </span>
       </p>

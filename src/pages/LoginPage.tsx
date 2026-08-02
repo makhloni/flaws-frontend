@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { login } from '../api/auth.api'
 import { useAuthStore } from '../store/useAuthStore'
 
+const RED = '#C1272D'
+
 export default function LoginPage() {
   const { mergeAndLogin } = useAuthStore()
   const [email, setEmail] = useState('')
@@ -36,7 +38,6 @@ export default function LoginPage() {
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
 
-        {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none' }}>
           <p style={{
             fontSize: '1.5rem',
@@ -55,14 +56,13 @@ export default function LoginPage() {
           fontSize: '0.65rem',
           letterSpacing: '0.25em',
           textTransform: 'uppercase',
-          color: '#888',
+          color: RED,
           textAlign: 'center',
           marginBottom: '2.5rem',
         }}>
           Sign in to your account
         </p>
 
-        {/* Fields */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
           <div>
             <p style={labelStyle}>Email</p>
@@ -86,14 +86,12 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <p style={{ fontSize: '0.7rem', color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center' }}>
             {error}
           </p>
         )}
 
-        {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={loading}
@@ -115,10 +113,9 @@ export default function LoginPage() {
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
 
-        {/* Register link */}
         <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#888' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: '#ffffff', textDecoration: 'none', borderBottom: '1px solid #444' }}>
+          <Link to="/register" style={{ color: RED, textDecoration: 'none', borderBottom: `1px solid ${RED}` }}>
             Create one
           </Link>
         </p>

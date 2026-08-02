@@ -5,6 +5,8 @@ import { useGuestCartStore } from '../store/useGuestCartStore'
 import { useAuthStore } from '../store/useAuthStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
+const RED = '#C1272D'
+
 export default function CartPage() {
   const { user } = useAuthStore()
   const { items: serverItems, total, loading, fetchCart, updateItem, removeItem } = useCartStore()
@@ -17,10 +19,9 @@ export default function CartPage() {
     if (user) fetchCart()
   }, [user])
 
-  const shipping = Number(total) >= 1000 ? 0 : 100
+  const shipping = Number(total) >= 1500 ? 0 : 100
   const orderTotal = Number(total) + shipping
 
-  // Guest totals
   const guestSubtotal = guestItems.reduce((sum, item) => {
     const price = item.variant.salePrice ?? item.variant.price
     return sum + price * item.quantity
@@ -41,7 +42,7 @@ export default function CartPage() {
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: isMobile ? '2rem 1rem' : '4rem 2rem' }}>
 
         <div style={{ marginBottom: '3rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.5rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
             Your Selection
           </p>
           <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -54,7 +55,7 @@ export default function CartPage() {
             <p style={{ color: '#888', fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '2rem' }}>
               Your cart is empty
             </p>
-            <Link to="/products" style={{ padding: '1rem 3rem', border: '1px solid #ffffff', color: '#ffffff', textDecoration: 'none', fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+            <Link to="/" style={{ padding: '1rem 3rem', border: '1px solid #ffffff', color: '#ffffff', textDecoration: 'none', fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
               Shop Now
             </Link>
           </div>
@@ -138,7 +139,7 @@ export default function CartPage() {
               </div>
 
               {(isGuest ? guestShipping : shipping) > 0 && (
-                <p style={{ fontSize: '0.65rem', color: '#555', marginBottom: '1rem' }}>Free shipping on orders over R1500</p>
+                <p style={{ fontSize: '0.65rem', color: RED, marginBottom: '1rem' }}>Free shipping on orders over R1500</p>
               )}
 
               <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between' }}>
@@ -150,7 +151,7 @@ export default function CartPage() {
 
               {/* Guest prompt */}
               {isGuest && (
-                <div style={{ background: '#111', border: '1px solid #1a1a1a', padding: '1rem', marginBottom: '1rem', textAlign: 'center' }}>
+                <div style={{ background: '#111', border: '1px solid #1a1a1a', borderTop: `2px solid ${RED}`, padding: '1rem', marginBottom: '1rem', textAlign: 'center' }}>
                   <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '0.75rem', lineHeight: 1.6 }}>
                     Sign in to complete your purchase. Your cart will be saved.
                   </p>
@@ -178,7 +179,7 @@ export default function CartPage() {
                     Checkout
                   </Link>
                   <Link
-                    to="/products"
+                    to="/"
                     style={{ display: 'block', textAlign: 'center', fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}
                   >
                     Continue Shopping

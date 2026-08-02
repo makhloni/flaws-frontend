@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
+const RED = '#C1272D'
+
 export default function ContactPage() {
   const { isMobile } = useBreakpoint()
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
@@ -33,9 +35,8 @@ export default function ContactPage() {
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: isMobile ? '3rem 1.5rem' : '6rem 2rem' }}>
 
-        {/* Header */}
         <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem', marginBottom: '4rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '0.75rem' }}>
+          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.75rem' }}>
             Get in Touch
           </p>
           <h1 style={{ fontSize: isMobile ? '1.75rem' : '2.5rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -45,7 +46,6 @@ export default function ContactPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '3rem' : '6rem', alignItems: 'start' }}>
 
-          {/* Left — Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div>
               <p style={labelStyle}>Email</p>
@@ -85,16 +85,15 @@ export default function ContactPage() {
 
             <div style={{ paddingTop: '1rem', borderTop: '1px solid #1a1a1a' }}>
               <p style={labelStyle}>Returns Policy</p>
-              <a href="/returns" style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'underline' }}>
+              <a href="/returns" style={{ fontSize: '0.85rem', color: RED, textDecoration: 'underline' }}>
                 Read our returns & refund policy →
               </a>
             </div>
           </div>
 
-          {/* Right — Form */}
           <div>
             {sent ? (
-              <div style={{ border: '1px solid #1a1a1a', padding: '2rem', textAlign: 'center' }}>
+              <div style={{ border: '1px solid #1a1a1a', borderTop: `2px solid ${RED}`, padding: '2rem', textAlign: 'center' }}>
                 <p style={{ fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#fff', marginBottom: '0.5rem' }}>
                   Message Sent
                 </p>

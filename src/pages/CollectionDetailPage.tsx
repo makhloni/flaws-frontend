@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getCollectionBySlug, getCollections } from '../api/collections.api'
+import flawsExtraHero1 from '../assets/IMG_2705.jpeg'
+import flawsExtraHero2 from '../assets/IMG_2708.jpeg'
+import flawsExtraHero3 from '../assets/IMG_2718.jpeg'
+import mainCollectionHero1 from '../assets/IMG_2713.jpeg'
+
+const collectionHeroImages: Record<string, string[]> = {
+  'flaws-extra': [flawsExtraHero1, flawsExtraHero2, flawsExtraHero3],
+  'main-collection': [mainCollectionHero1],
+}
+
 
 const RED = '#C1272D'
 
@@ -30,6 +40,7 @@ export default function CollectionDetailPage() {
   const [otherCollections, setOtherCollections] = useState<Collection[]>([])
   const [loading, setLoading] = useState(true)
 
+
   useEffect(() => {
     if (!slug) return
     setLoading(true)
@@ -54,13 +65,14 @@ export default function CollectionDetailPage() {
     </div>
   )
 
-  // Pull up to 3 product images for the hero collage — falls back to
-  // collection.imageUrl, then nothing, so this never crashes on a
-  // brand-new collection with few/no products yet.
-  const collageImages = collection.products
-    .map(p => p.images.find(i => i.isPrimary)?.url || p.images[0]?.url)
-    .filter(Boolean)
-    .slice(0, 3)
+
+  const collageImages = slug && collectionHeroImages[slug]
+    ? collectionHeroImages[slug]
+    : collection.products
+      .map(p => p.images.find(i => i.isPrimary)?.url || p.images[0]?.url)
+      .filter(Boolean)
+      .slice(0, 3)
+
   if (collageImages.length === 0 && collection.imageUrl) {
     collageImages.push(collection.imageUrl)
   }
@@ -105,22 +117,16 @@ export default function CollectionDetailPage() {
         </div>
       )}
 
-      {/* Breadcrumb + count */}
+      {/* Piece count */}
       <div style={{
         borderBottom: '1px solid #1a1a1a',
         padding: '1.5rem 2rem',
         maxWidth: '1400px',
         margin: '0 auto',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
       }}>
-        <Link
-          to="/collections"
-          style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#555', textDecoration: 'none' }}
-        >
-          ← Collections
-        </Link>
         <p style={{ fontSize: '0.75rem', color: '#888' }}>{collection.products.length} pieces</p>
       </div>
 
@@ -155,7 +161,7 @@ export default function CollectionDetailPage() {
               No products in this collection yet
             </p>
             <Link
-              to="/collections"
+              to="/"
               style={{
                 padding: '1rem 3rem',
                 border: '1px solid #ffffff',
@@ -166,7 +172,7 @@ export default function CollectionDetailPage() {
                 textTransform: 'uppercase',
               }}
             >
-              View Other Collections
+              Back to Home
             </Link>
           </div>
         ) : (
