@@ -12,7 +12,7 @@ export default function Footer() {
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
           gap: isMobile ? '2.5rem' : '2rem',
           marginBottom: isMobile ? '3rem' : '4rem',
         }}>
@@ -46,14 +46,14 @@ export default function Footer() {
           </div>
 
           <div>
-    <p style={footerHeading}>Legal</p>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <Link to="/terms" style={footerLink}>Terms & Conditions</Link>
-      <Link to="/privacy" style={footerLink}>Privacy Policy</Link>
-      <Link to="/shipping" style={footerLink}>Shipping & Delivery</Link>
-      <Link to="/returns" style={footerLink}>Returns & Refunds</Link>
-    </div>
-  </div>
+            <p style={footerHeading}>Legal</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <Link to="/terms" style={footerLink}>Terms & Conditions</Link>
+              <Link to="/privacy" style={footerLink}>Privacy Policy</Link>
+              <Link to="/shipping" style={footerLink}>Shipping & Delivery</Link>
+              <Link to="/returns" style={footerLink}>Returns & Refunds</Link>
+            </div>
+          </div>
 
         </div>
 
