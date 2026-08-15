@@ -45,6 +45,16 @@ export default function Footer() {
             </div>
           </div>
 
+          <div>
+    <p style={footerHeading}>Legal</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <Link to="/terms" style={footerLink}>Terms & Conditions</Link>
+      <Link to="/privacy" style={footerLink}>Privacy Policy</Link>
+      <Link to="/shipping" style={footerLink}>Shipping & Delivery</Link>
+      <Link to="/returns" style={footerLink}>Returns & Refunds</Link>
+    </div>
+  </div>
+
         </div>
 
         <div style={{

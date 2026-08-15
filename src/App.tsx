@@ -24,6 +24,9 @@ import { useContentStore } from './store/useContentStore'
 import { useGuestCartStore } from './store/useGuestCartStore'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import WaitlistPage from './pages/WaitlistPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import ShippingPolicyPage from './pages/ShippingPolicyPage'
 
 export default function App() {
   const { fetchMe, token } = useAuthStore()
@@ -72,6 +75,9 @@ export default function App() {
           <Route path="/collections/main-collection" element={<MainCollectionPage />} />
           <Route path="/collections/:slug" element={<CollectionDetailPage />} />
           <Route path="/returns" element={<ReturnsPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/shipping" element={<ShippingPolicyPage />} />
           <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </main>

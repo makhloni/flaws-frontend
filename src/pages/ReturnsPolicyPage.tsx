@@ -1,112 +1,46 @@
-import { useBreakpoint } from '../hooks/useBreakpoint'
+import LegalPageLayout, { LegalSection } from '../components/LegalPageLayout'
 
 const RED = '#C1272D'
+const linkStyle = { color: RED, textDecoration: 'underline' }
 
 export default function ReturnsPolicyPage() {
-  const { isMobile } = useBreakpoint()
-
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: isMobile ? '3rem 1.5rem' : '6rem 2rem' }}>
+    <LegalPageLayout
+      eyebrow="Legal"
+      title="Refund & Returns Policy"
+      lastUpdated="13 August 2026"
+    >
+      <LegalSection title="Return Policy">
+        <p>We want you to be completely satisfied with your FLAWS purchase. If you change your mind about your purchase, you may request a return within <strong style={{ color: '#fff' }}>14 days</strong> of receiving your order, subject to the conditions below and any statutory rights applicable to your purchase.</p>
+      </LegalSection>
 
-        <div style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem', marginBottom: '3rem' }}>
-          <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.75rem' }}>
-            Legal
-          </p>
-          <h1 style={{ fontSize: isMobile ? '1.75rem' : '2.5rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Returns & Refunds
-          </h1>
-          <p style={{ fontSize: '0.75rem', color: '#555', marginTop: '1rem' }}>
-            Last updated: March 2026
-          </p>
-        </div>
+      <LegalSection title="Return Conditions">
+        <p>Items must be unworn, unwashed and unused, and returned in their original condition with tags and packaging where applicable.</p>
+      </LegalSection>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <LegalSection title="Return Process">
+        <p>Contact FLAWS at <a href="mailto:support@flawswrldwide.com" style={linkStyle}>support@flawswrldwide.com</a> within 14 days of receiving your order. Include your order number and the reason for your return. We'll provide you with the next steps.</p>
+      </LegalSection>
 
-          <Section title="Our Policy">
-            We want you to love what you ordered. If something isn't right, we'll make it right. You have <strong style={{ color: '#fff' }}>14 days</strong> from the date of delivery to request a return or exchange.
-          </Section>
+      <LegalSection title="Return Shipping">
+        <p>For change-of-mind returns, the customer is responsible for the cost of return shipping. If we sent you the wrong item or the item is defective, FLAWS will cover the appropriate return costs.</p>
+      </LegalSection>
 
-          <Section title="Eligibility">
-            To be eligible for a return, your item must meet the following conditions:
-            <ul style={{ marginTop: '1rem', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {[
-                'Item is unworn, unwashed, and in original condition',
-                'All original tags are still attached',
-                'Item is in its original packaging',
-                'Item was not purchased on sale or marked as final sale',
-              ].map((item, i) => (
-                <li key={i} style={{ fontSize: '0.85rem', color: '#888', lineHeight: 1.7 }}>{item}</li>
-              ))}
-            </ul>
-          </Section>
+      <LegalSection title="Refunds">
+        <p>Once we receive and inspect your return, we'll confirm whether the refund has been approved. Approved refunds will be issued to the original payment method, subject to the applicable payment provider's processing times.</p>
+      </LegalSection>
 
-          <Section title="Non-Returnable Items">
-            The following items cannot be returned:
-            <ul style={{ marginTop: '1rem', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {[
-                'Sale or discounted items',
-                'Accessories (caps, belts, bags)',
-                'Items that have been worn, washed, or altered',
-                'Items without original tags or packaging',
-              ].map((item, i) => (
-                <li key={i} style={{ fontSize: '0.85rem', color: '#888', lineHeight: 1.7 }}>{item}</li>
-              ))}
-            </ul>
-          </Section>
+      <LegalSection title="Exchanges">
+        <p>Exchanges may be requested subject to stock availability. If the requested size or product is unavailable, we'll provide the applicable refund or alternative remedy.</p>
+      </LegalSection>
 
-          <Section title="How to Return">
-            <ol style={{ marginTop: '1rem', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {[
-                'Email us at returns@flaws.co.za with your order number and reason for return',
-                'We will respond within 2 business days with return instructions',
-                'Package your item securely and include your order number inside',
-                'Ship the item to the address provided — return shipping is at your cost unless the item is defective',
-                'Once received and inspected, we will process your refund or exchange within 5 business days',
-              ].map((item, i) => (
-                <li key={i} style={{ fontSize: '0.85rem', color: '#888', lineHeight: 1.7 }}>{item}</li>
-              ))}
-            </ol>
-          </Section>
+      <LegalSection title="Defective or Incorrect Items">
+        <p>If you receive a defective or incorrect product, contact us as soon as possible with your order number and photographs of the issue. We'll assess the issue and provide an appropriate remedy in accordance with applicable law.</p>
+      </LegalSection>
 
-          <Section title="Refunds">
-            Once your return is approved, your refund will be processed to your original payment method within <strong style={{ color: '#fff' }}>5–10 business days</strong> depending on your bank. We will notify you via email once the refund has been issued.
-          </Section>
-
-          <Section title="Exchanges">
-            We offer exchanges for different sizes or colours subject to availability. To request an exchange, follow the same process as a return and specify the item you'd like in its place.
-          </Section>
-
-          <Section title="Defective or Incorrect Items">
-            If you received a defective, damaged, or incorrect item, please contact us within <strong style={{ color: '#fff' }}>48 hours</strong> of delivery at <a href="mailto:support@flaws.co.za" style={{ color: RED, textDecoration: 'underline' }}>support@flaws.co.za</a>. Include photos of the item and your order number. We will cover all shipping costs for defective or incorrect items.
-          </Section>
-
-          <Section title="Contact">
-            For any questions about our returns policy, reach out to us at{' '}
-            <a href="mailto:returns@flaws.co.za" style={{ color: RED, textDecoration: 'underline' }}>
-              returns@flaws.co.za
-            </a>{' '}
-            or visit our{' '}
-            <a href="/contact" style={{ color: RED, textDecoration: 'underline' }}>
-              contact page
-            </a>.
-          </Section>
-
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '2rem' }}>
-      <h2 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '1rem' }}>
-        {title}
-      </h2>
-      <div style={{ fontSize: '0.85rem', color: '#888', lineHeight: 1.8 }}>
-        {children}
-      </div>
-    </div>
+      <LegalSection title="Need Help?">
+        <p>Contact <a href="mailto:support@flawswrldwide.com" style={linkStyle}>support@flawswrldwide.com</a> for questions about returns, refunds or exchanges — or visit our <a href="/contact" style={linkStyle}>contact page</a>.</p>
+      </LegalSection>
+    </LegalPageLayout>
   )
 }
