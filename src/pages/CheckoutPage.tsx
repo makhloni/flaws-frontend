@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useCartStore } from '../store/useCartStore'
+import { useShippingStore } from '../store/useShippingStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getAddresses, addAddress } from '../api/address.api'
 import { initializePayment } from '../api/payment.api'
-import { getShippingRates } from '../api/shipping.api'
 
 const RED = '#C1272D'
 
@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const navigate = useNavigate()
   const { isMobile } = useBreakpoint()
   const { items, total, fetchCart } = useCartStore()
+  const { fetchRates } = useShippingStore()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string>('')
   const [showAddForm, setShowAddForm] = useState(false)
@@ -67,16 +68,19 @@ export default function CheckoutPage() {
     })
   }, [])
 
-  // Fetch shipping rates whenever the selected address changes
+
   useEffect(() => {
-    if (!selectedAddress) {
+    if (!selectedAddress || items.length === 0) {
       setRates([])
       setSelectedService('')
       return
     }
     setRatesLoading(true)
     setSelectedService('')
-    getShippingRates(selectedAddress)
+
+    const cartItems = items.map((i: any) => ({ variantId: i.variant.id, quantity: i.quantity }))
+
+    fetchRates(selectedAddress, cartItems)
       .then((data) => {
         setRates(data)
         if (data.length > 0) setSelectedService(data[0].serviceLevelCode)
@@ -86,7 +90,7 @@ export default function CheckoutPage() {
         setError('Could not load delivery options for this address')
       })
       .finally(() => setRatesLoading(false))
-  }, [selectedAddress])
+  }, [selectedAddress, items])
 
   const handleAddAddress = async () => {
     if (!form.fullName || !form.street || !form.city || !form.province || !form.postalCode) {
