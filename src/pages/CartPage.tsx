@@ -68,7 +68,7 @@ const shipping = estimatedShipping
     const price = item.variant.salePrice ?? item.variant.price
     return sum + price * item.quantity
   }, 0)
-  // Guests have no saved address to quote against — this stays a flat estimate, clearly labeled below
+  
   const guestShipping = guestSubtotal >= 1500 ? 0 : 100
   const guestTotal = guestSubtotal + guestShipping
 
