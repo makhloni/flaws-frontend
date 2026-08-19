@@ -30,6 +30,12 @@ interface GuestCartStore {
 
 const STORAGE_KEY = 'flaws_guest_cart'
 
+function persist(items: GuestCartItem[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  } catch {}
+}
+
 export const useGuestCartStore = create<GuestCartStore>((set, get) => ({
   items: [],
 
@@ -54,29 +60,41 @@ export const useGuestCartStore = create<GuestCartStore>((set, get) => ({
           : i
       )
     } else {
-      updated = [...items, newItem]
+      updated = [...items, { ...newItem, quantity: Math.min(newItem.quantity, newItem.variant.stock) }]
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     set({ items: updated })
+    persist(updated)
   },
 
   removeItem: (variantId) => {
     const updated = get().items.filter(i => i.variantId !== variantId)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     set({ items: updated })
+    persist(updated)
   },
 
   updateItem: (variantId, quantity) => {
-    const updated = get().items.map(i =>
-      i.variantId === variantId ? { ...i, quantity } : i
-    )
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    const items = get().items
+    let updated: GuestCartItem[]
+
+    if (quantity <= 0) {
+      updated = items.filter(i => i.variantId !== variantId)
+    } else {
+      updated = items.map(i =>
+        i.variantId === variantId
+          ? { ...i, quantity: Math.min(quantity, i.variant.stock) }
+          : i
+      )
+    }
+
     set({ items: updated })
+    persist(updated)
   },
 
   clear: () => {
-    localStorage.removeItem(STORAGE_KEY)
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {}
     set({ items: [] })
   },
 }))
