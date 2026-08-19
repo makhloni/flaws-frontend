@@ -8,6 +8,7 @@ import { getAddresses } from '../api/address.api'
 import { getShippingRates } from '../api/shipping.api'
 
 const RED = '#C1272D'
+const FREE_SHIPPING_THRESHOLD = 1500
 
 export default function CartPage() {
   const { user } = useAuthStore()
@@ -49,8 +50,11 @@ export default function CartPage() {
       .finally(() => setShippingLoading(false))
   }, [user, defaultAddressId])
 
-  // Real shipping for logged-in users: live rate if we have one, otherwise null (unknown, not a fake flat rate)
-  const shipping = estimatedShipping
+  // Real shipping for logged-in users: live rate if we have one, otherwise null (unknown, not a fake flat rate).
+  // The R1500 free-shipping rule applies on top of the real rate — a live quote doesn't override the threshold.
+  const qualifiesForFreeShipping = Number(total) >= FREE_SHIPPING_THRESHOLD
+  const rawShipping = estimatedShipping
+  const shipping = qualifiesForFreeShipping ? 0 : rawShipping
   const orderTotal = Number(total) + (shipping ?? 0)
 
   const guestSubtotal = guestItems.reduce((sum, item) => {
@@ -58,7 +62,8 @@ export default function CartPage() {
     return sum + price * item.quantity
   }, 0)
   // Guests have no saved address to quote against — this stays a flat estimate, clearly labeled below
-  const guestShipping = guestSubtotal >= 1500 ? 0 : 100
+  const guestQualifiesForFreeShipping = guestSubtotal >= FREE_SHIPPING_THRESHOLD
+  const guestShipping = guestQualifiesForFreeShipping ? 0 : 100
   const guestTotal = guestSubtotal + guestShipping
 
   if (loading && user) return (
@@ -163,7 +168,7 @@ export default function CartPage() {
                 <p style={{ fontSize: '0.8rem' }}>R{isGuest ? guestSubtotal.toFixed(2) : Number(total).toFixed(2)}</p>
               </div>
 
-              {/* Logged-in user: real rate, loading state, or honest "unknown yet" */}
+              {/* Logged-in user: real rate (with free-shipping threshold applied), loading state, or honest "unknown yet" */}
               {!isGuest && (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
@@ -171,14 +176,16 @@ export default function CartPage() {
                     <p style={{ fontSize: '0.8rem', color: shipping === 0 ? '#888' : '#fff' }}>
                       {shippingLoading
                         ? 'Calculating...'
-                        : shipping === null
-                          ? 'Calculated at checkout'
-                          : shipping === 0
-                            ? 'Free'
-                            : `R${shipping.toFixed(2)}`}
+                        : qualifiesForFreeShipping
+                          ? 'Free'
+                          : shipping === null
+                            ? 'Calculated at checkout'
+                            : shipping === 0
+                              ? 'Free'
+                              : `R${shipping.toFixed(2)}`}
                     </p>
                   </div>
-                  {defaultAddressId === null && !shippingLoading && (
+                  {defaultAddressId === null && !shippingLoading && !qualifiesForFreeShipping && (
                     <p style={{ fontSize: '0.65rem', color: '#888', marginBottom: '1rem' }}>
                       Add an address to see your real shipping cost
                     </p>
@@ -201,8 +208,9 @@ export default function CartPage() {
                 </>
               )}
 
-              {((isGuest ? guestShipping : shipping) ?? 0) > 0 && (
-                <p style={{ fontSize: '0.65rem', color: RED, marginBottom: '1rem' }}>Free shipping on orders over R1500</p>
+              {/* Only show the free-shipping nudge if they actually don't qualify yet */}
+              {!(isGuest ? guestQualifiesForFreeShipping : qualifiesForFreeShipping) && ((isGuest ? guestShipping : shipping) ?? 0) > 0 && (
+                <p style={{ fontSize: '0.65rem', color: RED, marginBottom: '1rem' }}>Free shipping on orders over R{FREE_SHIPPING_THRESHOLD}</p>
               )}
 
               <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between' }}>
