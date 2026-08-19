@@ -30,7 +30,6 @@ const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
   import { useShippingStore } from '../store/useShippingStore'
 import { getAddresses } from '../api/address.api'
 
-// ...inside the component:
 const { fetchRates, loading: shippingLoading } = useShippingStore()
 const [defaultAddressId, setDefaultAddressId] = useState<string | null>(null)
 const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
