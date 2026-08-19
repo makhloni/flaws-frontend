@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useAuthStore } from '../store/useAuthStore'
 import { useCartStore } from '../store/useCartStore'
 import { useGuestCartStore } from '../store/useGuestCartStore'
-import { useAuthStore } from '../store/useAuthStore'
+import { useShippingStore } from '../store/useShippingStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getAddresses } from '../api/address.api'
-import { getShippingRates } from '../api/shipping.api'
+import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
-const RED = '#C1272D'
 const FREE_SHIPPING_THRESHOLD = 1500
+const RED = '#C' 
 
 export default function CartPage() {
   const { user } = useAuthStore()
   const { items: serverItems, total, loading, fetchCart, updateItem, removeItem } = useCartStore()
   const { items: guestItems, updateItem: updateGuest, removeItem: removeGuest } = useGuestCartStore()
   const { isMobile } = useBreakpoint()
+  const { fetchRates, loading: shippingLoading } = useShippingStore()
 
   const isGuest = !user
 
   const [defaultAddressId, setDefaultAddressId] = useState<string | null>(null)
   const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
-  const [shippingLoading, setShippingLoading] = useState(false)
 
   useEffect(() => {
     if (user) fetchCart()
@@ -37,20 +37,19 @@ export default function CartPage() {
       .catch(() => setDefaultAddressId(null))
   }, [user])
 
-  // Step 2: once we have an address, fetch the real Courier Guy rate
+  // Step 2: once we have an address AND cart items, fetch the real (cached) Courier Guy rate
   useEffect(() => {
-    if (!user || !defaultAddressId) {
+    if (!user || !defaultAddressId || serverItems.length === 0) {
       setEstimatedShipping(null)
       return
     }
-    setShippingLoading(true)
-    getShippingRates(defaultAddressId)
+    const cartItems = serverItems.map((i: any) => ({ variantId: i.variant.id, quantity: i.quantity }))
+    fetchRates(defaultAddressId, cartItems)
       .then((rates) => setEstimatedShipping(rates[0]?.price ?? null))
       .catch(() => setEstimatedShipping(null))
-      .finally(() => setShippingLoading(false))
-  }, [user, defaultAddressId])
+  }, [user, defaultAddressId, serverItems])
 
-  // Real shipping for logged-in users: live rate if we have one, otherwise null (unknown, not a fake flat rate).
+  // Real shipping for logged-in users: live (cached) rate if we have one, otherwise null (unknown, not a fake flat rate).
   // The R1500 free-shipping rule applies on top of the real rate — a live quote doesn't override the threshold.
   const qualifiesForFreeShipping = Number(total) >= FREE_SHIPPING_THRESHOLD
   const rawShipping = estimatedShipping
@@ -177,12 +176,12 @@ export default function CartPage() {
                       {shippingLoading
                         ? 'Calculating...'
                         : qualifiesForFreeShipping
-                          ? 'Free'
-                          : shipping === null
-                            ? 'Calculated at checkout'
-                            : shipping === 0
-                              ? 'Free'
-                              : `R${shipping.toFixed(2)}`}
+                        ? 'Free'
+                        : shipping === null
+                        ? 'Calculated at checkout'
+                        : shipping === 0
+                        ? 'Free'
+                        : `R${shipping.toFixed(2)}`}
                     </p>
                   </div>
                   {defaultAddressId === null && !shippingLoading && !qualifiesForFreeShipping && (
