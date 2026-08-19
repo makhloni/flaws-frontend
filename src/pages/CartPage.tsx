@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 const FREE_SHIPPING_THRESHOLD = 1500
-const RED = '#C' 
+const RED = '#C1272D' 
 
 export default function CartPage() {
   const { user } = useAuthStore()
