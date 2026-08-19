@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCartStore } from '../store/useCartStore'
 import { useGuestCartStore } from '../store/useGuestCartStore'
 import { useAuthStore } from '../store/useAuthStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getAddresses } from '../api/address.api'
+import { getShippingRates } from '../api/shipping.api'
 
 const RED = '#C1272D'
 
@@ -15,25 +17,47 @@ export default function CartPage() {
 
   const isGuest = !user
 
+  const [defaultAddressId, setDefaultAddressId] = useState<string | null>(null)
+  const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
+  const [shippingLoading, setShippingLoading] = useState(false)
+
   useEffect(() => {
     if (user) fetchCart()
   }, [user])
 
-useEffect(() => {
-  if (user && defaultAddressId) {
-    getShippingRates(defaultAddressId)
-      .then(rates => setEstimatedShipping(rates[0]?.price ?? null))
-      .catch(() => setEstimatedShipping(null))
-  }
-}, [user, defaultAddressId])
+  // Step 1: find the user's default address
+  useEffect(() => {
+    if (!user) return
+    getAddresses()
+      .then((addresses) => {
+        const def = addresses.find((a: any) => a.isDefault) || addresses[0]
+        setDefaultAddressId(def?.id ?? null)
+      })
+      .catch(() => setDefaultAddressId(null))
+  }, [user])
 
-  const shipping = Number(total) >= 1500 ? 0 : 100
-  const orderTotal = Number(total) + shipping
+  // Step 2: once we have an address, fetch the real Courier Guy rate
+  useEffect(() => {
+    if (!user || !defaultAddressId) {
+      setEstimatedShipping(null)
+      return
+    }
+    setShippingLoading(true)
+    getShippingRates(defaultAddressId)
+      .then((rates) => setEstimatedShipping(rates[0]?.price ?? null))
+      .catch(() => setEstimatedShipping(null))
+      .finally(() => setShippingLoading(false))
+  }, [user, defaultAddressId])
+
+  // Real shipping for logged-in users: live rate if we have one, otherwise null (unknown, not a fake flat rate)
+  const shipping = estimatedShipping
+  const orderTotal = Number(total) + (shipping ?? 0)
 
   const guestSubtotal = guestItems.reduce((sum, item) => {
     const price = item.variant.salePrice ?? item.variant.price
     return sum + price * item.quantity
   }, 0)
+  // Guests have no saved address to quote against — this stays a flat estimate, clearly labeled below
   const guestShipping = guestSubtotal >= 1500 ? 0 : 100
   const guestTotal = guestSubtotal + guestShipping
 
@@ -139,14 +163,45 @@ useEffect(() => {
                 <p style={{ fontSize: '0.8rem' }}>R{isGuest ? guestSubtotal.toFixed(2) : Number(total).toFixed(2)}</p>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <p style={{ fontSize: '0.8rem', color: '#888' }}>Shipping</p>
-                <p style={{ fontSize: '0.8rem', color: (isGuest ? guestShipping : shipping) === 0 ? '#888' : '#fff' }}>
-                  {(isGuest ? guestShipping : shipping) === 0 ? 'Free' : 'R100.00'}
-                </p>
-              </div>
+              {/* Logged-in user: real rate, loading state, or honest "unknown yet" */}
+              {!isGuest && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <p style={{ fontSize: '0.8rem', color: '#888' }}>Shipping</p>
+                    <p style={{ fontSize: '0.8rem', color: shipping === 0 ? '#888' : '#fff' }}>
+                      {shippingLoading
+                        ? 'Calculating...'
+                        : shipping === null
+                          ? 'Calculated at checkout'
+                          : shipping === 0
+                            ? 'Free'
+                            : `R${shipping.toFixed(2)}`}
+                    </p>
+                  </div>
+                  {defaultAddressId === null && !shippingLoading && (
+                    <p style={{ fontSize: '0.65rem', color: '#888', marginBottom: '1rem' }}>
+                      Add an address to see your real shipping cost
+                    </p>
+                  )}
+                </>
+              )}
 
-              {(isGuest ? guestShipping : shipping) > 0 && (
+              {/* Guest: no address to quote against, so this stays a flat estimate — labeled honestly */}
+              {isGuest && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <p style={{ fontSize: '0.8rem', color: '#888' }}>Estimated Shipping</p>
+                    <p style={{ fontSize: '0.8rem', color: guestShipping === 0 ? '#888' : '#fff' }}>
+                      {guestShipping === 0 ? 'Free' : `R${guestShipping.toFixed(2)}`}
+                    </p>
+                  </div>
+                  <p style={{ fontSize: '0.65rem', color: '#888', marginBottom: '1rem' }}>
+                    Final rate calculated at checkout based on your address
+                  </p>
+                </>
+              )}
+
+              {((isGuest ? guestShipping : shipping) ?? 0) > 0 && (
                 <p style={{ fontSize: '0.65rem', color: RED, marginBottom: '1rem' }}>Free shipping on orders over R1500</p>
               )}
 
