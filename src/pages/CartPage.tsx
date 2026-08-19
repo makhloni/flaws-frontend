@@ -26,7 +26,7 @@ export default function CartPage() {
     if (user) fetchCart()
   }, [user])
 
-  // Step 1: find the user's default address
+ 
   useEffect(() => {
     if (!user) return
     getAddresses()
@@ -37,7 +37,6 @@ export default function CartPage() {
       .catch(() => setDefaultAddressId(null))
   }, [user])
 
-  // Step 2: once we have an address AND cart items, fetch the real (cached) Courier Guy rate
   useEffect(() => {
     if (!user || !defaultAddressId || serverItems.length === 0) {
       setEstimatedShipping(null)
@@ -49,8 +48,7 @@ export default function CartPage() {
       .catch(() => setEstimatedShipping(null))
   }, [user, defaultAddressId, serverItems])
 
-  // Real shipping for logged-in users: live (cached) rate if we have one, otherwise null (unknown, not a fake flat rate).
-  // The R1500 free-shipping rule applies on top of the real rate — a live quote doesn't override the threshold.
+
   const qualifiesForFreeShipping = Number(total) >= FREE_SHIPPING_THRESHOLD
   const rawShipping = estimatedShipping
   const shipping = qualifiesForFreeShipping ? 0 : rawShipping
@@ -60,7 +58,7 @@ export default function CartPage() {
     const price = item.variant.salePrice ?? item.variant.price
     return sum + price * item.quantity
   }, 0)
-  // Guests have no saved address to quote against — this stays a flat estimate, clearly labeled below
+  
   const guestQualifiesForFreeShipping = guestSubtotal >= FREE_SHIPPING_THRESHOLD
   const guestShipping = guestQualifiesForFreeShipping ? 0 : 100
   const guestTotal = guestSubtotal + guestShipping
