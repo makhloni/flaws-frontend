@@ -19,6 +19,14 @@ export default function CartPage() {
     if (user) fetchCart()
   }, [user])
 
+useEffect(() => {
+  if (user && defaultAddressId) {
+    getShippingRates(defaultAddressId)
+      .then(rates => setEstimatedShipping(rates[0]?.price ?? null))
+      .catch(() => setEstimatedShipping(null))
+  }
+}, [user, defaultAddressId])
+
   const shipping = Number(total) >= 1500 ? 0 : 100
   const orderTotal = Number(total) + shipping
 
