@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getAddresses } from '../api/address.api'
 import { getShippingRates } from '../api/shipping.api'
+import { useShippingStore } from '../store/useShippingStore'
 
 const RED = '#C1272D'
 
@@ -17,40 +18,51 @@ export default function CartPage() {
 
   const isGuest = !user
 
-  const [defaultAddressId, setDefaultAddressId] = useState<string | null>(null)
-  const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
-  const [shippingLoading, setShippingLoading] = useState(false)
+  const { fetchRates, loading: shippingLoading } = useShippingStore()
+const [defaultAddressId, setDefaultAddressId] = useState<string | null>(null)
+const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
+
 
   useEffect(() => {
     if (user) fetchCart()
   }, [user])
 
-  // Step 1: find the user's default address
-  useEffect(() => {
-    if (!user) return
-    getAddresses()
-      .then((addresses) => {
-        const def = addresses.find((a: any) => a.isDefault) || addresses[0]
-        setDefaultAddressId(def?.id ?? null)
-      })
-      .catch(() => setDefaultAddressId(null))
-  }, [user])
+  import { useShippingStore } from '../store/useShippingStore'
+import { getAddresses } from '../api/address.api'
 
-  // Step 2: once we have an address, fetch the real Courier Guy rate
-  useEffect(() => {
-    if (!user || !defaultAddressId) {
-      setEstimatedShipping(null)
-      return
-    }
-    setShippingLoading(true)
-    getShippingRates(defaultAddressId)
-      .then((rates) => setEstimatedShipping(rates[0]?.price ?? null))
-      .catch(() => setEstimatedShipping(null))
-      .finally(() => setShippingLoading(false))
-  }, [user, defaultAddressId])
+// ...inside the component:
+const { fetchRates, loading: shippingLoading } = useShippingStore()
+const [defaultAddressId, setDefaultAddressId] = useState<string | null>(null)
+const [estimatedShipping, setEstimatedShipping] = useState<number | null>(null)
 
-  // Real shipping for logged-in users: live rate if we have one, otherwise null (unknown, not a fake flat rate)
-  const shipping = estimatedShipping
+useEffect(() => {
+  if (user) fetchCart()
+}, [user])
+
+useEffect(() => {
+  if (!user) return
+  getAddresses()
+    .then((addresses) => {
+      const def = addresses.find((a: any) => a.isDefault) || addresses[0]
+      setDefaultAddressId(def?.id ?? null)
+    })
+    .catch(() => setDefaultAddressId(null))
+}, [user])
+
+useEffect(() => {
+  if (!user || !defaultAddressId || serverItems.length === 0) {
+    setEstimatedShipping(null)
+    return
+  }
+  const cartItems = serverItems.map((i: any) => ({ variantId: i.variant.id, quantity: i.quantity }))
+  fetchRates(defaultAddressId, cartItems)
+    .then((rates) => setEstimatedShipping(rates[0]?.price ?? null))
+    .catch(() => setEstimatedShipping(null))
+}, [user, defaultAddressId, serverItems])
+
+const shipping = estimatedShipping
+
+
   const orderTotal = Number(total) + (shipping ?? 0)
 
   const guestSubtotal = guestItems.reduce((sum, item) => {
