@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useCartStore } from '../store/useCartStore'
+import { useShippingStore } from '../store/useShippingStore'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getAddresses, addAddress } from '../api/address.api'
 import { initializePayment } from '../api/payment.api'
-import { getShippingRates } from '../api/shipping.api'
 
 const RED = '#C1272D'
 const FREE_SHIPPING_THRESHOLD = 1500
@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const navigate = useNavigate()
   const { isMobile } = useBreakpoint()
   const { items, total, fetchCart } = useCartStore()
+  const { fetchRates, loading: ratesLoading } = useShippingStore()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string>('')
   const [showAddForm, setShowAddForm] = useState(false)
@@ -38,7 +39,6 @@ export default function CheckoutPage() {
   const [searchParams] = useSearchParams()
 
   const [rates, setRates] = useState<Rate[]>([])
-  const [ratesLoading, setRatesLoading] = useState(false)
   const [selectedService, setSelectedService] = useState<string>('')
 
   const [form, setForm] = useState({
@@ -67,16 +67,15 @@ export default function CheckoutPage() {
     })
   }, [])
 
-  // Fetch shipping rates whenever the selected address changes
   useEffect(() => {
-    if (!selectedAddress) {
+    if (!selectedAddress || items.length === 0) {
       setRates([])
       setSelectedService('')
       return
     }
-    setRatesLoading(true)
     setSelectedService('')
-    getShippingRates(selectedAddress)
+    const cartItems = items.map((i: any) => ({ variantId: i.variant.id, quantity: i.quantity }))
+    fetchRates(selectedAddress, cartItems)
       .then((data) => {
         setRates(data)
         if (data.length > 0) setSelectedService(data[0].serviceLevelCode)
@@ -85,8 +84,7 @@ export default function CheckoutPage() {
         setRates([])
         setError('Could not load delivery options for this address')
       })
-      .finally(() => setRatesLoading(false))
-  }, [selectedAddress])
+  }, [selectedAddress, items])
 
   const handleAddAddress = async () => {
     if (!form.fullName || !form.street || !form.city || !form.province || !form.postalCode) {
@@ -136,8 +134,6 @@ export default function CheckoutPage() {
   }
 
   const selectedRate = rates.find((r) => r.serviceLevelCode === selectedService)
-  // The R1500 free-shipping rule applies on top of whatever the courier quotes —
-  // a live rate doesn't override the threshold, same as on the cart page.
   const qualifiesForFreeShipping = Number(total) >= FREE_SHIPPING_THRESHOLD
   const shipping = qualifiesForFreeShipping ? 0 : (selectedRate ? selectedRate.price : 0)
   const orderTotal = Number(total) + shipping
@@ -146,7 +142,6 @@ export default function CheckoutPage() {
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: isMobile ? '2rem 1rem' : '4rem 2rem' }}>
 
-        {/* Header */}
         <div style={{ marginBottom: '3rem', borderBottom: '1px solid #1a1a1a', paddingBottom: '2rem' }}>
           <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
             Final Step
@@ -163,7 +158,6 @@ export default function CheckoutPage() {
           alignItems: 'flex-start',
         }}>
 
-          {/* Left — Address + Delivery Options */}
           <div style={{ flex: 1, width: '100%' }}>
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '1.5rem' }}>
               Delivery Address
@@ -181,7 +175,6 @@ export default function CheckoutPage() {
                       cursor: 'pointer',
                       transition: 'border 0.2s',
                     }}
-
                   >
                     <p style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem' }}>{address.fullName}</p>
                     <p style={{ fontSize: '0.75rem', color: '#888', lineHeight: 1.6 }}>
@@ -273,7 +266,6 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Delivery Options */}
             {selectedAddress && (
               <div style={{ marginTop: '3rem' }}>
                 <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '1.5rem' }}>
@@ -326,7 +318,6 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Right — Order Summary */}
           <div style={{
             width: isMobile ? '100%' : '380px',
             flexShrink: 0,
