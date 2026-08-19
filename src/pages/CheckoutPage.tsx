@@ -7,7 +7,7 @@ import { initializePayment } from '../api/payment.api'
 import { getShippingRates } from '../api/shipping.api'
 
 const RED = '#C1272D'
-
+const FREE_SHIPPING_THRESHOLD = 1500
 
 interface Address {
   id: string
@@ -136,7 +136,10 @@ export default function CheckoutPage() {
   }
 
   const selectedRate = rates.find((r) => r.serviceLevelCode === selectedService)
-  const shipping = selectedRate ? selectedRate.price : 0
+  // The R1500 free-shipping rule applies on top of whatever the courier quotes —
+  // a live rate doesn't override the threshold, same as on the cart page.
+  const qualifiesForFreeShipping = Number(total) >= FREE_SHIPPING_THRESHOLD
+  const shipping = qualifiesForFreeShipping ? 0 : (selectedRate ? selectedRate.price : 0)
   const orderTotal = Number(total) + shipping
 
   return (
@@ -307,11 +310,17 @@ export default function CheckoutPage() {
                           {rate.serviceLevelName}
                         </p>
                         <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                          {rate.price === 0 ? 'Free' : `R${rate.price.toFixed(2)}`}
+                          {qualifiesForFreeShipping ? 'Free' : (rate.price === 0 ? 'Free' : `R${rate.price.toFixed(2)}`)}
                         </p>
                       </div>
                     ))}
                   </div>
+                )}
+
+                {qualifiesForFreeShipping && !ratesLoading && rates.length > 0 && (
+                  <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '1rem' }}>
+                    Your order qualifies for free shipping (over R{FREE_SHIPPING_THRESHOLD}) — displayed rates are waived at checkout.
+                  </p>
                 )}
               </div>
             )}
@@ -363,6 +372,9 @@ export default function CheckoutPage() {
                   {selectedRate ? (shipping === 0 ? 'Free' : `R${shipping.toFixed(2)}`) : '—'}
                 </p>
               </div>
+              {!qualifiesForFreeShipping && selectedRate && shipping > 0 && (
+                <p style={{ fontSize: '0.65rem', color: RED }}>Free shipping on orders over R{FREE_SHIPPING_THRESHOLD}</p>
+              )}
               <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
                 <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>Total</p>
                 <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>R{orderTotal.toFixed(2)}</p>
