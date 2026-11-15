@@ -22,10 +22,12 @@ interface Product {
   id: string
   name: string
   slug: string
-  description: string
+  description: string | null
   gender: string
   isFeatured: boolean
-  collection: { name: string; slug: string }
+  isPreorder: boolean
+  preorderReleaseDate: string | null
+  collection: { name: string; slug: string } | null
   images: { id: string; url: string; isPrimary: boolean; position: number }[]
   variants: Variant[]
 }
@@ -68,7 +70,8 @@ export default function ProductDetailPage() {
     getRelatedProducts(slug).then(setRelated)
   }, [slug])
 
-  const sortedImages = product?.images.sort((a, b) => a.position - b.position) || []
+  // copy before sorting so we never mutate React state
+  const sortedImages = [...(product?.images ?? [])].sort((a, b) => a.position - b.position)
   const colors = [...new Map(product?.variants.map((v) => [v.color, v]) || []).values()]
   const selectedColor = selectedVariant?.color
   const sizesForColor = product?.variants.filter((v) => v.color === selectedColor) || []
@@ -87,13 +90,15 @@ export default function ProductDetailPage() {
           quantity,
         })
       } else {
-        addToGuestCart({
+        const result = addToGuestCart({
           productId: product!.id,
           variantId: selectedVariant.id,
           quantity,
           product: {
             name: product!.name,
             slug: product!.slug,
+            isPreorder: product!.isPreorder,
+            preorderReleaseDate: product!.preorderReleaseDate,
             images: product!.images,
           },
           variant: {
@@ -105,6 +110,11 @@ export default function ProductDetailPage() {
             stock: selectedVariant.stock,
           },
         })
+        if (!result.ok) {
+          setError(result.message || 'Could not add to cart')
+          setAdding(false)
+          return
+        }
       }
 
       setAdded(true)
@@ -129,6 +139,10 @@ export default function ProductDetailPage() {
   )
 
   const price = selectedVariant?.salePrice ?? selectedVariant?.price
+
+  const releaseLabel = product.preorderReleaseDate
+    ? new Date(product.preorderReleaseDate).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
@@ -219,7 +233,8 @@ export default function ProductDetailPage() {
         <div style={{ flex: 1, paddingTop: isMobile ? 0 : '2rem', minWidth: 0 }}>
 
           <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: RED, marginBottom: '1.5rem' }}>
-            {product.collection?.name} / {product.gender}
+            {product.collection?.name ? `${product.collection.name} / ` : ''}{product.gender}
+            {product.isPreorder && ' / Preorder'}
           </p>
 
           <h1 style={{ fontSize: isMobile ? '1.4rem' : '1.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>
@@ -337,7 +352,11 @@ export default function ProductDetailPage() {
 
           {selectedVariant && (
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.1em', color: selectedVariant.stock < 5 ? '#ff6b6b' : '#888', marginBottom: '1.5rem' }}>
-              {selectedVariant.stock === 0 ? 'Out of stock' : selectedVariant.stock < 5 ? `Only ${selectedVariant.stock} left` : 'In stock'}
+              {selectedVariant.stock === 0
+                ? (product.isPreorder ? 'Preorders full' : 'Out of stock')
+                : selectedVariant.stock < 5
+                ? `Only ${selectedVariant.stock} ${product.isPreorder ? 'preorder spots ' : ''}left`
+                : (product.isPreorder ? 'Preorder open' : 'In stock')}
             </p>
           )}
 
@@ -363,8 +382,20 @@ export default function ProductDetailPage() {
               marginBottom: '1rem',
             }}
           >
-            {adding ? 'Adding...' : added ? 'Added to Cart ✓' : 'Add to Cart'}
+            {adding
+              ? 'Adding...'
+              : added
+              ? (product.isPreorder ? 'Preorder Added ✓' : 'Added to Cart ✓')
+              : (product.isPreorder ? 'Preorder Now' : 'Add to Cart')}
           </button>
+
+          {product.isPreorder && (
+            <p style={{ fontSize: '0.65rem', color: '#888', lineHeight: 1.7, marginBottom: '1rem' }}>
+              Preorder: you're charged in full at checkout. This item has not shipped yet
+              {releaseLabel && <> — expected release <span style={{ color: '#fff' }}>{releaseLabel}</span></>}.
+              Delivery happens after release.
+            </p>
+          )}
 
           <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #1a1a1a' }}>
             <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#888', marginBottom: '1rem' }}>

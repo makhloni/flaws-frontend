@@ -37,6 +37,7 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState('')
   const [searchParams] = useSearchParams()
+  const [ackPreorder, setAckPreorder] = useState(false)
 
   const [rates, setRates] = useState<Rate[]>([])
   const [selectedService, setSelectedService] = useState<string>('')
@@ -101,10 +102,18 @@ export default function CheckoutPage() {
     }
   }
 
+  const hasPreorder = items.some((i: any) => i.product.isPreorder)
+  const releaseDate = items.find((i: any) => i.product.isPreorder)?.product.preorderReleaseDate
+  const releaseLabel = releaseDate
+    ? new Date(releaseDate).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
+  const blocked = !selectedService || (hasPreorder && !ackPreorder)
+
   const handlePlaceOrder = async () => {
     if (!selectedAddress) return setError('Please select a delivery address')
     if (!selectedService) return setError('Please select a delivery option')
     if (items.length === 0) return setError('Your cart is empty')
+    if (hasPreorder && !ackPreorder) return setError('Please confirm you understand this is a preorder')
 
     setPlacing(true)
     setError('')
@@ -343,6 +352,11 @@ export default function CheckoutPage() {
                       <p style={{ fontSize: '0.65rem', color: '#888' }}>
                         {item.variant.color} / {item.variant.size} × {item.quantity}
                       </p>
+                      {item.product.isPreorder && (
+                        <p style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: RED }}>
+                          Preorder
+                        </p>
+                      )}
                     </div>
                     <p style={{ fontSize: '0.75rem', color: '#888', whiteSpace: 'nowrap' }}>
                       R{(Number(price) * item.quantity).toFixed(2)}
@@ -372,28 +386,43 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {hasPreorder && (
+              <label style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '1.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={ackPreorder}
+                  onChange={(e) => setAckPreorder(e.target.checked)}
+                  style={{ marginTop: '3px' }}
+                />
+                <span style={{ fontSize: '0.7rem', color: '#888', lineHeight: 1.6 }}>
+                  I understand this is a preorder. I'm paying in full today and my order will ship after release
+                  {releaseLabel && <> (expected {releaseLabel})</>}.
+                </span>
+              </label>
+            )}
+
             {error && (
               <p style={{ fontSize: '0.7rem', color: '#ff6b6b', marginBottom: '1rem' }}>{error}</p>
             )}
 
             <button
               onClick={handlePlaceOrder}
-              disabled={placing || items.length === 0 || !selectedService}
+              disabled={placing || items.length === 0 || blocked}
               style={{
                 width: '100%',
                 padding: '1.25rem',
-                background: placing || !selectedService ? '#333' : '#ffffff',
-                color: placing || !selectedService ? '#888' : '#0a0a0a',
+                background: placing || blocked ? '#333' : '#ffffff',
+                color: placing || blocked ? '#888' : '#0a0a0a',
                 border: 'none',
                 fontSize: '0.7rem',
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 fontWeight: 600,
-                cursor: placing || !selectedService ? 'not-allowed' : 'pointer',
+                cursor: placing || blocked ? 'not-allowed' : 'pointer',
                 transition: 'all 0.3s',
               }}
             >
-              {placing ? 'Initializing...' : 'Pay Now'}
+              {placing ? 'Initializing...' : hasPreorder ? 'Pay for Preorder' : 'Pay Now'}
             </button>
 
           </div>

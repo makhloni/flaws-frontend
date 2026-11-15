@@ -69,7 +69,11 @@ export default function CartPage() {
     </div>
   )
 
-  const isEmpty = isGuest ? guestItems.length === 0 : serverItems.length === 0
+  const currentItems: any[] = isGuest ? guestItems : serverItems
+  const isEmpty = currentItems.length === 0
+  const hasPreorder = currentItems.some((i: any) => i.product.isPreorder)
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
@@ -80,7 +84,7 @@ export default function CartPage() {
             Your Selection
           </p>
           <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Cart {!isEmpty && `(${isGuest ? guestItems.length : serverItems.length})`}
+            Cart {!isEmpty && `(${currentItems.length})`}
           </h1>
         </div>
 
@@ -98,7 +102,7 @@ export default function CartPage() {
 
             {/* Items */}
             <div style={{ flex: 1, width: '100%' }}>
-              {(isGuest ? guestItems : serverItems).map((item: any) => {
+              {currentItems.map((item: any) => {
                 const image = item.product.images.find((i: any) => i.isPrimary)?.url || item.product.images[0]?.url
                 const price = item.variant.salePrice ?? item.variant.price
 
@@ -120,6 +124,11 @@ export default function CartPage() {
                         <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '0.25rem' }}>
                           {item.variant.color} / {item.variant.size}
                         </p>
+                        {item.product.isPreorder && (
+                          <p style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: RED, marginBottom: '0.25rem' }}>
+                            Preorder{item.product.preorderReleaseDate && ` · ships ~${formatDate(item.product.preorderReleaseDate)}`}
+                          </p>
+                        )}
                         <p style={{ fontSize: '0.8rem', color: '#fff' }}>
                           R{Number(price).toFixed(2)}
                         </p>
@@ -208,6 +217,12 @@ export default function CartPage() {
               {/* Only show the free-shipping nudge if they actually don't qualify yet */}
               {!(isGuest ? guestQualifiesForFreeShipping : qualifiesForFreeShipping) && ((isGuest ? guestShipping : shipping) ?? 0) > 0 && (
                 <p style={{ fontSize: '0.65rem', color: RED, marginBottom: '1rem' }}>Free shipping on orders over R{FREE_SHIPPING_THRESHOLD}</p>
+              )}
+
+              {hasPreorder && (
+                <p style={{ fontSize: '0.65rem', color: '#888', marginBottom: '1rem', lineHeight: 1.6 }}>
+                  Preorder: charged now, shipped after release.
+                </p>
               )}
 
               <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between' }}>

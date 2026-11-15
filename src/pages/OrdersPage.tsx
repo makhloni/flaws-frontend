@@ -9,6 +9,8 @@ interface Order {
   status: string
   total: number
   createdAt: string
+  isPreorder: boolean
+  expectedReleaseDate: string | null
   items: { id: string; quantity: number; product: { name: string } }[]
 }
 
@@ -98,7 +100,7 @@ export default function OrdersPage() {
                 onMouseLeave={(e) => e.currentTarget.style.paddingLeft = '0'}
                 >
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                       <p style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: '#555' }}>
                         #{order.id.slice(0, 8).toUpperCase()}
                       </p>
@@ -112,6 +114,18 @@ export default function OrdersPage() {
                       }}>
                         {order.status}
                       </span>
+                      {order.isPreorder && (
+                        <span style={{
+                          fontSize: '0.55rem',
+                          letterSpacing: '0.15em',
+                          textTransform: 'uppercase',
+                          color: RED,
+                          border: `1px solid ${RED}`,
+                          padding: '3px 8px',
+                        }}>
+                          Preorder
+                        </span>
+                      )}
                     </div>
                     <p style={{ fontSize: '0.8rem', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
                       {order.items.map(i => i.product.name).join(', ')}
@@ -119,6 +133,11 @@ export default function OrdersPage() {
                     <p style={{ fontSize: '0.7rem', color: '#555' }}>
                       {new Date(order.createdAt).toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
+                    {order.isPreorder && order.expectedReleaseDate && (
+                      <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.25rem' }}>
+                        Ships ~{new Date(order.expectedReleaseDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                    )}
                   </div>
                   <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>R{Number(order.total).toFixed(2)}</p>

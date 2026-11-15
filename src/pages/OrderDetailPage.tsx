@@ -28,6 +28,8 @@ interface Order {
   discount: number
   total: number
   isPaid: boolean
+  isPreorder: boolean
+  expectedReleaseDate: string | null
   createdAt: string
   trackingNumber: string | null
   address: {
@@ -94,6 +96,16 @@ export default function OrderDetailPage() {
     REFUNDED: '#ff6b6b',
   }[order.status] || '#888'
 
+  const releaseLabel = order.expectedReleaseDate
+    ? new Date(order.expectedReleaseDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })
+    : null
+
+  const eyebrow = order.status === 'CANCELLED'
+    ? 'Order Cancelled'
+    : order.isPreorder
+    ? 'Preorder Confirmed'
+    : 'Order Confirmed'
+
   return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '4rem 2rem' }}>
@@ -103,7 +115,7 @@ export default function OrderDetailPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: RED, marginBottom: '0.5rem' }}>
-                Order Confirmed
+                {eyebrow}
               </p>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                 Thank You
@@ -129,6 +141,20 @@ export default function OrderDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Preorder notice */}
+        {order.isPreorder && order.status !== 'CANCELLED' && (
+          <div style={{ border: '1px solid #1a1a1a', borderLeft: `2px solid ${RED}`, padding: '1.5rem', marginBottom: '3rem' }}>
+            <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: RED, marginBottom: '0.75rem' }}>
+              Preorder
+            </p>
+            <p style={{ fontSize: '0.8rem', color: '#ccc', lineHeight: 1.8 }}>
+              Your payment has been received. This order has not shipped yet
+              {releaseLabel && <> — expected release <span style={{ color: '#fff', fontWeight: 600 }}>{releaseLabel}</span></>}.
+              We'll email you tracking details as soon as it's on its way.
+            </p>
+          </div>
+        )}
 
         {/* Items */}
         <div style={{ marginBottom: '3rem' }}>

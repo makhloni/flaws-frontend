@@ -18,6 +18,8 @@ interface CartItem {
     id: string
     name: string
     slug: string
+    isPreorder: boolean
+    preorderReleaseDate: string | null
     images: { url: string; isPrimary: boolean }[]
   }
 }

@@ -1,4 +1,4 @@
-// pages/PaymentSuccessPage.tsx
+
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { verifyPayment } from '../api/payment.api'
@@ -9,9 +9,9 @@ export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
   const { fetchCart } = useCartStore()
   const [status, setStatus] = useState<'loading' | 'error'>('loading')
+  const reference = searchParams.get('reference')
 
   useEffect(() => {
-    const reference = searchParams.get('reference')
     if (!reference) {
       navigate('/')
       return
@@ -28,19 +28,32 @@ export default function PaymentSuccessPage() {
   if (status === 'error') {
     return (
       <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingTop: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '0 1rem' }}>
           <p style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#888', marginBottom: '1rem' }}>
             Something went wrong
           </p>
-          <p style={{ fontSize: '0.8rem', color: '#ff6b6b', marginBottom: '2rem' }}>
-            Payment may have succeeded but we couldn't confirm your order. Contact support with your reference.
+          <p style={{ fontSize: '0.8rem', color: '#ff6b6b', marginBottom: '1rem' }}>
+            Payment may have succeeded but we couldn't confirm your order yet. Check your email and your orders page before paying again.
           </p>
-          <button
-            onClick={() => navigate('/')}
-            style={{ padding: '0.9rem 2rem', background: '#fff', color: '#0a0a0a', border: 'none', fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer' }}
-          >
-            Go Home
-          </button>
+          {reference && (
+            <p style={{ fontSize: '0.7rem', color: '#888', marginBottom: '2rem', letterSpacing: '0.05em' }}>
+              Your payment reference: <span style={{ color: '#fff', userSelect: 'all' }}>{reference}</span>
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/orders')}
+              style={{ padding: '0.9rem 2rem', background: '#fff', color: '#0a0a0a', border: 'none', fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer' }}
+            >
+              My Orders
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              style={{ padding: '0.9rem 2rem', background: 'none', color: '#888', border: '1px solid #333', fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer' }}
+            >
+              Go Home
+            </button>
+          </div>
         </div>
       </div>
     )

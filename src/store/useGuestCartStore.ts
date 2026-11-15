@@ -7,6 +7,8 @@ export interface GuestCartItem {
   product: {
     name: string
     slug: string
+    isPreorder: boolean
+    preorderReleaseDate: string | null
     images: { url: string; isPrimary: boolean }[]
   }
   variant: {
@@ -19,9 +21,14 @@ export interface GuestCartItem {
   }
 }
 
+export interface AddItemResult {
+  ok: boolean
+  message?: string
+}
+
 interface GuestCartStore {
   items: GuestCartItem[]
-  addItem: (item: GuestCartItem) => void
+  addItem: (item: GuestCartItem) => AddItemResult
   removeItem: (variantId: string) => void
   updateItem: (variantId: string, quantity: number) => void
   clear: () => void
@@ -50,6 +57,24 @@ export const useGuestCartStore = create<GuestCartStore>((set, get) => ({
 
   addItem: (newItem) => {
     const items = get().items
+
+    // Preorder rules (mirrors the server): no mixing, one preorder product per cart
+    const others = items.filter(i => i.variantId !== newItem.variantId)
+    if (others.length > 0) {
+      const cartHasPreorder = others.some(i => i.product.isPreorder)
+      if (newItem.product.isPreorder !== cartHasPreorder) {
+        return {
+          ok: false,
+          message: newItem.product.isPreorder
+            ? 'Preorders must be bought separately. Check out your current cart first.'
+            : 'Your cart contains a preorder. Check out or clear it before adding other items.',
+        }
+      }
+      if (newItem.product.isPreorder && others.some(i => i.productId !== newItem.productId)) {
+        return { ok: false, message: 'You can only preorder one product per order.' }
+      }
+    }
+
     const existing = items.find(i => i.variantId === newItem.variantId)
     let updated: GuestCartItem[]
 
@@ -65,6 +90,7 @@ export const useGuestCartStore = create<GuestCartStore>((set, get) => ({
 
     set({ items: updated })
     persist(updated)
+    return { ok: true }
   },
 
   removeItem: (variantId) => {
